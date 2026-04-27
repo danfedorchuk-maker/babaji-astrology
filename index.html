@@ -26,7 +26,9 @@
         <input type="text" id="location" placeholder="City of Birth">
         
         <button onclick="getInsights()">Seek Cosmic Creaminess</button>
-
+        <button onclick="getInsights()">Seek Cosmic Creaminess</button>
+<button onclick="printInsight()" style="background: #2e8b57; margin-top: 10px;">Print for Contemplation</button>
+<button onclick="printInsight()" style="background: #2e8b57; margin-top: 10px;">Print for Contemplation</button>
         <div id="babaji-text">Babaji is closing his eyes, waiting for the stars to speak...</div>
         <div id="status" class="limit-text"></div>
     </div>
@@ -75,10 +77,36 @@
                 updateStatus();
                 
                 // FINAL RESPONSE
-                output.innerText = "The alignment in " + loc + " suggests your path is winding but flavored with creaminess. " +
-                                 "Come back when the moon shifts, or pay for the deep truth.";
             }, 2000);
-        }
-    </script>
+    } // This bracket MUST end getInsights
+
+    // This is the separate Print function
+    function printInsight() {
+        const name = document.getElementById('name').value || "Seeker";
+        const insight = document.getElementById('babaji-text').innerText;
+        
+        const printWindow = window.open('', '_blank');
+        printWindow.document.write(`
+            <html>
+                <head>
+                    <title>Babaji's Cosmic Insight</title>
+                    <style>
+                        body { font-family: 'Times New Roman', serif; padding: 50px; text-align: center; border: 10px double #d4af37; color: #000; background: #fff; }
+                        h1 { color: #4b0082; border-bottom: 2px solid #d4af37; padding-bottom: 10px; }
+                        .content { font-size: 1.4rem; margin-top: 30px; line-height: 1.6; font-style: italic; }
+                        .footer { margin-top: 50px; font-size: 0.9rem; color: #666; border-top: 1px solid #eee; padding-top: 20px; }
+                    </style>
+                </head>
+                <body>
+                    <h1>A Celestial Message for ${name}</h1>
+                    <div class="content">"${insight}"</div>
+                    <div class="footer">Documented via Babaji Astrology. <br> The stars do not lie, they only illuminate.</div>
+                    <script>window.print();<\/script>
+                </body>
+            </html>
+        `);
+        printWindow.document.close();
+    }
+</script>
 </body>
 </html>
