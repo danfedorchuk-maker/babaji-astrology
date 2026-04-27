@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Babaji's Cosmic Creaminess</title>
+    <style>
+        body {
+            background: radial-gradient(circle at center, #1b2735 0%, #090a0f 100%);
+            color: #e0e0e0;
+            font-family: 'Georgia', serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .nebula-bg {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: url('https://www.transparenttextures.com/patterns/stardust.png');
+            z-index: -1; opacity: 0.5;
+        }
+        .container {
+            max-width: 400px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 0 20px rgba(100, 149, 237, 0.2);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        h1 { color: #ffd700; text-align: center; text-shadow: 0 0 10px #daa520; }
+        input {
+            width: 100%; padding: 12px; margin: 10px 0;
+            background: #111; border: 1px solid #444;
+            color: #fff; border-radius: 8px;
+        }
+        button {
+            width: 100%; padding: 15px; margin-top: 20px;
+            background: linear-gradient(45deg, #4b0082, #000080);
+            color: gold; border: none; border-radius: 10px;
+            font-weight: bold; cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+        #response { margin-top: 30px; }
+        .babaji { color: #00ffff; font-style: italic; border-left: 3px solid #00ffff; padding-left: 10px; }
+        .prabhu { color: #32cd32; font-weight: bold; margin-top: 15px; }
+    </style>
+</head>
+<body>
+    <div class="nebula-bg"></div>
+    <h1>Ask Babaji</h1>
+    <div class="container">
+        <input type="text" id="name" placeholder="Name for the Guru...">
+        <input type="date" id="dob">
+        <input type="time" id="tob">
+        <input type="text" id="location" placeholder="City of Birth">
+        <button onclick="getInsights()">Seek Cosmic Creaminess</button>
+        
+        <div id="response">
+            <div id="babaji-text" class="babaji"></div>
+            <div id="prabhu-text" class="prabhu"></div>
+        </div>
+    </div>
+
+    <script>
+        async function getInsights() {
+            // Logic for the 3-query limit and Vercel fetch goes here
+            document.getElementById('babaji-text').innerText = "Babaji is consulting the stars...";
+        }
+    </script>
+</body>
+</html>
