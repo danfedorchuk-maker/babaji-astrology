@@ -3,72 +3,81 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Babaji's Cosmic Creaminess</title>
+    <title>Babaji Astrology</title>
     <style>
-        body {
-            background: radial-gradient(circle at center, #1b2735 0%, #090a0f 100%);
-            color: #e0e0e0;
-            font-family: 'Georgia', serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 20px;
-            min-height: 100vh;
-        }
-        .nebula-bg {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: url('https://www.transparenttextures.com/patterns/stardust.png');
-            z-index: -1; opacity: 0.5;
-        }
-        .container {
-            max-width: 400px;
-            width: 100%;
-            background: rgba(255, 255, 255, 0.05);
-            padding: 30px;
-            border-radius: 20px;
-            box-shadow: 0 0 20px rgba(100, 149, 237, 0.2);
-            backdrop-filter: blur(5px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        h1 { color: #ffd700; text-align: center; text-shadow: 0 0 10px #daa520; }
-        input {
-            width: 100%; padding: 12px; margin: 10px 0;
-            background: #111; border: 1px solid #444;
-            color: #fff; border-radius: 8px;
-        }
-        button {
-            width: 100%; padding: 15px; margin-top: 20px;
-            background: linear-gradient(45deg, #4b0082, #000080);
-            color: gold; border: none; border-radius: 10px;
-            font-weight: bold; cursor: pointer;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-        }
-        #response { margin-top: 30px; }
-        .babaji { color: #00ffff; font-style: italic; border-left: 3px solid #00ffff; padding-left: 10px; }
-        .prabhu { color: #32cd32; font-weight: bold; margin-top: 15px; }
+        body { background: #0b0b1a; color: #d4af37; font-family: 'Courier New', Courier, monospace; text-align: center; padding: 20px; margin: 0; }
+        .cosmic-box { border: 2px solid #d4af37; padding: 20px; border-radius: 15px; background: rgba(255,255,255,0.05); max-width: 500px; margin: auto; }
+        h1 { letter-spacing: 5px; text-shadow: 0 0 10px #d4af37; }
+        input { padding: 12px; margin: 8px 0; border-radius: 5px; border: 1px solid #d4af37; background: #1a1a2e; color: white; width: 90%; font-size: 1rem; }
+        button { background: #4b0082; color: white; padding: 15px; border: none; border-radius: 50px; cursor: pointer; font-size: 1.1rem; width: 95%; margin-top: 15px; box-shadow: 0 0 15px #6a0dad; }
+        #babaji-text { margin-top: 25px; font-style: italic; min-height: 60px; line-height: 1.5; color: #eee; }
+        .limit-text { font-size: 0.8rem; color: #888; margin-top: 10px; }
     </style>
 </head>
 <body>
-    <div class="nebula-bg"></div>
-    <h1>Ask Babaji</h1>
-    <div class="container">
-        <input type="text" id="name" placeholder="Name for the Guru...">
-        <input type="date" id="dob">
-        <input type="time" id="tob">
-        <input type="text" id="location" placeholder="City of Birth">
-        <button onclick="getInsights()">Seek Cosmic Creaminess</button>
+
+    <div class="cosmic-box">
+        <h1>ASK BABAJI</h1>
+        <p>The stars do not give credit. Enter your details.</p>
         
-        <div id="response">
-            <div id="babaji-text" class="babaji"></div>
-            <div id="prabhu-text" class="prabhu"></div>
-        </div>
+        <input type="text" id="name" placeholder="Client Name">
+        <input type="date" id="dob" title="Date of Birth">
+        <input type="time" id="tob" title="Time of Birth">
+        <input type="text" id="location" placeholder="City of Birth">
+        
+        <button onclick="getInsights()">Seek Cosmic Creaminess</button>
+
+        <div id="babaji-text">Babaji is closing his eyes, waiting for a soul...</div>
+        <div id="status" class="limit-text"></div>
     </div>
 
     <script>
+        // 1. PERSISTENT MEMORY: This stays even if they close/reload the app
+        let queryCount = parseInt(localStorage.getItem('babaji_limit')) || 0;
+
+        // Show the status immediately on load
+        updateStatus();
+
+        function updateStatus() {
+            const s = document.getElementById('status');
+            if (queryCount >= 3) {
+                s.innerHTML = "<b style='color:#ff4444;'>FREE ACCESS EXPIRED.</b>";
+            } else {
+                s.innerText = "Free insights used: " + queryCount + " of 3";
+            }
+        }
+
         async function getInsights() {
-            // Logic for the 3-query limit and Vercel fetch goes here
-            document.getElementById('babaji-text').innerText = "Babaji is consulting the stars...";
+            const name = document.getElementById('name').value;
+            const dob = document.getElementById('dob').value;
+            const loc = document.getElementById('location').value;
+            const output = document.getElementById('babaji-text');
+
+            // 2. THE MERCHANT LOCK: Hard cutoff
+            if (queryCount >= 3) {
+                output.innerHTML = "Babaji has seen enough of your future for free, " + name + ".<br><br>" +
+                                 "<span style='color: #00ff00; font-size: 1.3rem;'>Donate $3.00 to open the Third Eye.</span>";
+                return;
+            }
+
+            if (!name || !dob) {
+                alert("Babaji cannot find a nameless soul. Fill the boxes!");
+                return;
+            }
+
+            // 3. THE "CALCULATION" ANIMATION
+            output.innerText = "Vibrating the cosmic strings for " + name + "...";
+            
+            setTimeout(() => {
+                // INCREMENT AND SAVE
+                queryCount++;
+                localStorage.setItem('babaji_limit', queryCount);
+                updateStatus();
+                
+                // FINAL RESPONSE
+                output.innerText = "The alignment in " + loc + " suggests your path is winding but flavored with creaminess. " +
+                                 "Come back when the moon shifts, or pay for the deep truth.";
+            }, 2000);
         }
     </script>
 </body>
