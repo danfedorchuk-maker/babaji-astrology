@@ -3,9 +3,8 @@ export default async function handler(req, res) {
 
     const { name, dob, tob, loc } = req.body;
 
-    // DIAGNOSTIC: Check if the vault is actually open
     if (!process.env.GROQ_API_KEY) {
-        return res.status(500).json({ reading: "Babaji says: The Vault is locked. (Missing API Key in Vercel)" });
+        return res.status(500).json({ reading: "Babaji says: The Vault is locked. (Check Vercel Env Variables)" });
     }
 
     try {
@@ -16,11 +15,11 @@ export default async function handler(req, res) {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                model: "llama3-70b-8192", // Stable model name
+                model: "llama-3.3-70b-versatile", // THE NEW ACTIVE MODEL
                 messages: [
                     {
                         role: "system",
-                        content: "You are Babaji, a blunt 72-year-old mystical astrologer. You dredge the silt. Give a raw, unique reading. Mention their city. Mention the 'creaminess' of their fate."
+                        content: "You are Babaji, a blunt 72-year-old mystical astrologer. You dredge the silt. Give a raw, unique reading. Mention their city. Mention the 'creaminess' of their fate. Be specific and slightly eccentric."
                     },
                     {
                         role: "user",
