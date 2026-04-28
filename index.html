@@ -10,6 +10,7 @@
         h1 { letter-spacing: 5px; text-shadow: 0 0 10px #d4af37; }
         input { padding: 12px; margin: 8px 0; border-radius: 5px; border: 1px solid #d4af37; background: #1a1a2e; color: white; width: 90%; font-size: 1rem; }
         button { background: #4b0082; color: white; padding: 15px; border: none; border-radius: 50px; cursor: pointer; font-size: 1.1rem; width: 95%; margin-top: 15px; box-shadow: 0 0 15px #6a0dad; }
+        .btn-print { background: #2e8b57; margin-top: 10px; }
         #babaji-text { margin-top: 25px; font-style: italic; min-height: 60px; line-height: 1.5; color: #eee; }
         .limit-text { font-size: 0.8rem; color: #888; margin-top: 10px; }
     </style>
@@ -18,7 +19,7 @@
 
     <div class="cosmic-box">
         <h1>ASK BABAJI</h1>
-        <p>The stars do not give credit. Enter your details.</p>
+        <p>The constellations do not offer credit. Enter your coordinates.</p>
         
         <input type="text" id="name" placeholder="Client Name">
         <input type="date" id="dob" title="Date of Birth">
@@ -26,87 +27,93 @@
         <input type="text" id="location" placeholder="City of Birth">
         
         <button onclick="getInsights()">Seek Cosmic Creaminess</button>
-        <button onclick="getInsights()">Seek Cosmic Creaminess</button>
-<button onclick="printInsight()" style="background: #2e8b57; margin-top: 10px;">Print for Contemplation</button>
-<button onclick="printInsight()" style="background: #2e8b57; margin-top: 10px;">Print for Contemplation</button>
-        <div id="babaji-text">Babaji is closing his eyes, waiting for the stars to speak...</div>
+        <button onclick="printInsight()" class="btn-print">Print for Contemplation</button>
+
+        <div id="babaji-text">Babaji is tuning into the celestial frequencies...</div>
         <div id="status" class="limit-text"></div>
     </div>
 
     <script>
-        // 1. PERSISTENT MEMORY: This stays even if they close/reload the app
         let queryCount = parseInt(localStorage.getItem('babaji_limit')) || 0;
-
-        // Show the status immediately on load
         updateStatus();
 
         function updateStatus() {
             const s = document.getElementById('status');
             if (queryCount >= 3) {
-                s.innerHTML = "<b style='color:#ff4444;'>FREE ACCESS EXPIRED.</b>";
+                s.innerHTML = "<b style='color:#ff4444;'>FREE GUIDANCE DEPLETED.</b>";
             } else {
-                s.innerText = "Free insights used: " + queryCount + " of 3";
+                s.innerText = "Cosmic drops used: " + queryCount + " of 3";
             }
         }
 
         async function getInsights() {
             const name = document.getElementById('name').value;
             const dob = document.getElementById('dob').value;
+            const tob = document.getElementById('tob').value;
             const loc = document.getElementById('location').value;
             const output = document.getElementById('babaji-text');
 
-            // 2. THE MERCHANT LOCK: Hard cutoff
             if (queryCount >= 3) {
-                output.innerHTML = "Babaji has seen enough of your future for free, " + name + ".<br><br>" +
-                                 "<span style='color: #00ff00; font-size: 1.3rem;'>Donate $3.00 to open the Third Eye.</span>";
+                output.innerHTML = "The starlight has dimmed for your free journey, " + name + ".<br><br><span style='color: #00ff00; font-size: 1.3rem;'>Donate $3.00 to reopen the portal.</span>";
                 return;
             }
 
             if (!name || !dob) {
-                alert("Babaji cannot find a nameless soul. Fill the boxes!");
+                alert("Babaji needs your name and date to find your spark!");
                 return;
             }
 
-            // 3. THE "CALCULATION" ANIMATION
-            output.innerText = "Vibrating the cosmic strings for " + name + "...";
-            
-            setTimeout(() => {
-                // INCREMENT AND SAVE
-                queryCount++;
-                localStorage.setItem('babaji_limit', queryCount);
-                updateStatus();
-                
-                // FINAL RESPONSE
-            }, 2000);
-    } // This bracket MUST end getInsights
+            output.innerText = "Babaji is dredging the celestial silt...";
 
-    // This is the separate Print function
-    function printInsight() {
-        const name = document.getElementById('name').value || "Seeker";
-        const insight = document.getElementById('babaji-text').innerText;
-        
-        const printWindow = window.open('', '_blank');
-        printWindow.document.write(`
-            <html>
-                <head>
-                    <title>Babaji's Cosmic Insight</title>
-                    <style>
-                        body { font-family: 'Times New Roman', serif; padding: 50px; text-align: center; border: 10px double #d4af37; color: #000; background: #fff; }
-                        h1 { color: #4b0082; border-bottom: 2px solid #d4af37; padding-bottom: 10px; }
-                        .content { font-size: 1.4rem; margin-top: 30px; line-height: 1.6; font-style: italic; }
-                        .footer { margin-top: 50px; font-size: 0.9rem; color: #666; border-top: 1px solid #eee; padding-top: 20px; }
-                    </style>
-                </head>
-                <body>
-                    <h1>A Celestial Message for ${name}</h1>
-                    <div class="content">"${insight}"</div>
-                    <div class="footer">Documented via Babaji Astrology. <br> The stars do not lie, they only illuminate.</div>
-                    <script>window.print();<\/script>
-                </body>
-            </html>
-        `);
-        printWindow.document.close();
-    }
-</script>
+            try {
+                // CALLING THE LIVE AI BRIDGE
+                const response = await fetch('/api/babaji', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, dob, tob, loc })
+                });
+                
+                const data = await response.json();
+                
+                if (data.reading) {
+                    output.innerText = data.reading;
+                    queryCount++;
+                    localStorage.setItem('babaji_limit', queryCount);
+                    updateStatus();
+                } else {
+                    output.innerText = "The stars are cloudy. Try once more.";
+                }
+
+            } catch (e) {
+                output.innerText = "The cosmic connection is flickering. Check your internet.";
+            }
+        }
+
+        function printInsight() {
+            const name = document.getElementById('name').value || "Seeker";
+            const insight = document.getElementById('babaji-text').innerText;
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <html>
+                    <head>
+                        <title>Babaji's Cosmic Insight</title>
+                        <style>
+                            body { font-family: 'Times New Roman', serif; padding: 50px; text-align: center; border: 10px double #d4af37; color: #000; background: #fff; }
+                            h1 { color: #4b0082; border-bottom: 2px solid #d4af37; padding-bottom: 10px; }
+                            .content { font-size: 1.4rem; margin-top: 30px; line-height: 1.6; font-style: italic; }
+                            .footer { margin-top: 50px; font-size: 0.9rem; color: #666; border-top: 1px solid #eee; padding-top: 20px; }
+                        </style>
+                    </head>
+                    <body>
+                        <h1>A Celestial Message for ${name}</h1>
+                        <div class="content">"${insight}"</div>
+                        <div class="footer">Documented via Babaji Astrology. <br> The stars do not lie, they only illuminate.</div>
+                        <script>window.print();<\/script>
+                    </body>
+                </html>
+            `);
+            printWindow.document.close();
+        }
+    </script>
 </body>
 </html>
