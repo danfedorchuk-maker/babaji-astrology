@@ -9,51 +9,54 @@
         .cosmic-box { border: 2px solid #d4af37; padding: 20px; border-radius: 15px; background: rgba(255,255,255,0.05); max-width: 500px; margin: auto; }
         h1 { letter-spacing: 5px; text-shadow: 0 0 10px #d4af37; margin-bottom: 2px; }
         .precision-tag { font-size: 0.7rem; letter-spacing: 2px; color: #888; margin-bottom: 20px; display: block; }
-        
-        /* THE INPUT LABELS */
         .form-group { text-align: left; width: 90%; margin: auto; margin-bottom: 15px; }
-        label { font-size: 0.75rem; text-transform: uppercase; color: #d4af37; display: block; margin-bottom: 5px; margin-left: 2px; }
-        
+        label { font-size: 0.75rem; text-transform: uppercase; color: #d4af37; display: block; margin-bottom: 5px; }
         input { padding: 12px; border-radius: 5px; border: 1px solid #d4af37; background: #1a1a2e; color: white; width: 100%; font-size: 1rem; box-sizing: border-box; }
-        
         button { background: #4b0082; color: white; padding: 15px; border: none; border-radius: 50px; cursor: pointer; font-size: 1.1rem; width: 95%; margin-top: 15px; box-shadow: 0 0 15px #6a0dad; }
         .btn-print { background: #2e8b57; margin-top: 10px; font-size: 0.9rem; }
+        #babaji-text { margin-top: 25px; font-style: italic; min-height: 80px; line-height: 1.6; color: #eee; padding: 15px; border-top: 1px dashed #444; white-space: pre-wrap; text-align: left; }
         
-        #babaji-text { margin-top: 25px; font-style: italic; min-height: 80px; line-height: 1.6; color: #eee; padding: 10px; border-top: 1px dashed #444; white-space: pre-wrap; }
-        .limit-text { font-size: 0.8rem; color: #888; margin-top: 15px; }
+        /* PRINT LOGIC: Hides everything except the message */
+        @media print {
+            body { background: white !important; color: black !important; padding: 0; }
+            .cosmic-box, button, input, label, h1, .precision-tag, .subtitle { display: none !important; }
+            #babaji-text { 
+                display: block !important; 
+                visibility: visible; 
+                color: black !important; 
+                border: 10px double #d4af37 !important; 
+                padding: 40px; 
+                font-family: 'Times New Roman', serif;
+                font-size: 1.4rem;
+                margin: 0;
+            }
+            #babaji-text::before {
+                content: "BABAJI'S COSMIC INSIGHT";
+                display: block;
+                text-align: center;
+                font-size: 2rem;
+                border-bottom: 2px solid black;
+                margin-bottom: 30px;
+            }
+        }
     </style>
 </head>
 <body>
 
     <div class="cosmic-box">
         <h1>ASK BABAJI</h1>
-        <span class="precision-tag">ACCURATE HOUSE CALCULATIONS</span>
+        <span class="precision-tag">130 LANGUAGES • ACCURATE HOUSES</span>
         
-        <div class="form-group">
-            <label>Seeker's Name</label>
-            <input type="text" id="name" placeholder="Name">
-        </div>
-
-        <div class="form-group">
-            <label>Date of Birth</label>
-            <input type="date" id="dob">
-        </div>
-
-        <div class="form-group">
-            <label>Time of Birth (CRUCIAL)</label>
-            <input type="time" id="tob">
-        </div>
-
-        <div class="form-group">
-            <label>City of Birth</label>
-            <input type="text" id="location" placeholder="City, Country">
-        </div>
+        <div class="form-group"><label>Name</label><input type="text" id="name" placeholder="Name"></div>
+        <div class="form-group"><label>Date of Birth</label><input type="date" id="dob"></div>
+        <div class="form-group"><label>Time of Arrival (Crucial)</label><input type="time" id="tob"></div>
+        <div class="form-group"><label>City of Birth</label><input type="text" id="location" placeholder="City, Country"></div>
         
         <button onclick="getInsights()">Seek Cosmic Creaminess</button>
         <button onclick="printInsight()" class="btn-print">Print for Contemplation</button>
 
         <div id="babaji-text">Babaji is waiting for your specific arrival time...</div>
-        <div id="status" class="limit-text"></div>
+        <div id="status" style="font-size:0.8rem; color:#888; margin-top:15px;"></div>
     </div>
 
     <script>
@@ -62,11 +65,7 @@
 
         function updateStatus() {
             const s = document.getElementById('status');
-            if (queryCount >= 3) {
-                s.innerHTML = "<b style='color:#ff4444;'>FREE ACCESS DEPLETED.</b>";
-            } else {
-                s.innerText = "Insights used: " + queryCount + " of 3";
-            }
+            s.innerText = queryCount >= 3 ? "FREE ACCESS DEPLETED." : "Insights used: " + queryCount + " of 3";
         }
 
         async function getInsights() {
@@ -77,17 +76,16 @@
             const output = document.getElementById('babaji-text');
 
             if (queryCount >= 3) {
-                output.innerHTML = "Babaji's third eye is closed to you for free, " + name + ".<br><br><span style='color: #00ff00; font-size: 1.2rem;'>Donate $3.00 to see deeper.</span>";
+                output.innerHTML = "The portal is closed, " + name + ".<br><br><span style='color: #00ff00;'>Donate $3.00 to see deeper.</span>";
                 return;
             }
 
-            // ENFORCING TIME ENTRY
             if (!name || !dob || !tob || !loc) {
-                alert("Babaji needs the TIME. Without the clock, there are no houses.");
+                alert("Babaji needs ALL coordinates—especially the TIME.");
                 return;
             }
 
-            output.innerText = "Dredging the silt of your specific arrival...";
+            output.innerText = "Dredging the silt of your arrival...";
 
             try {
                 const response = await fetch('/api/babaji', {
@@ -98,57 +96,31 @@
                 const data = await response.json();
                 
                 if (data.reading) {
-                    output.innerText = data.reading;
+                    // TYPEWRITER EFFECT
+                    let i = 0;
+                    output.innerText = "";
+                    function typeWriter() {
+                        if (i < data.reading.length) {
+                            output.innerText += data.reading.charAt(i);
+                            i++;
+                            setTimeout(typeWriter, 25);
+                        }
+                    }
+                    typeWriter();
+
                     queryCount++;
                     localStorage.setItem('babaji_limit', queryCount);
                     updateStatus();
-                } else {
-                    output.innerText = "The stars are cloudy. Check the coordinates.";
                 }
             } catch (e) {
-                output.innerText = "Connection severed. The celestial bridge is down.";
+                output.innerText = "The connection is flickering.";
             }
         }
 
         function printInsight() {
-           function printInsight() {
-    const insight = document.getElementById('babaji-text').innerText;
-    if (insight.includes("waiting") || insight === "") {
-        alert("Babaji has not spoken yet. You cannot print silence.");
-        return;
-    }
-
-    // This creates a print-only style on the fly
-    const style = document.createElement('style');
-    style.innerHTML = `
-        @media print {
-            body * { visibility: hidden; }
-            #babaji-text, #babaji-text * { visibility: visible; color: black !important; }
-            #babaji-text { 
-                position: absolute; 
-                left: 0; top: 0; 
-                width: 100%; 
-                padding: 40px;
-                border: 5px double #d4af37;
-                font-family: 'Times New Roman', serif;
-                font-size: 1.2rem;
-                text-align: center;
-            }
-            #babaji-text::before {
-                content: "BABAJI'S COSMIC INSIGHT";
-                display: block;
-                font-weight: bold;
-                font-size: 2rem;
-                margin-bottom: 20px;
-                border-bottom: 2px solid #000;
-            }
-        }
-    `;
-    document.head.appendChild(style);
-    window.print();
-    document.head.removeChild(style); // Clean up after
-}
-            printWindow.document.close();
+            const text = document.getElementById('babaji-text').innerText;
+            if (text.length < 50) return alert("Nothing to print yet.");
+            window.print();
         }
     </script>
 </body>
