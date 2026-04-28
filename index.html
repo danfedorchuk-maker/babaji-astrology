@@ -5,122 +5,77 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Babaji Astrology</title>
     <style>
-        body { background: #0b0b1a; color: #d4af37; font-family: 'Courier New', Courier, monospace; text-align: center; padding: 20px; margin: 0; }
+        body { background: #0b0b1a; color: #d4af37; font-family: 'Courier New', Courier, monospace; text-align: center; padding: 20px; }
         .cosmic-box { border: 2px solid #d4af37; padding: 20px; border-radius: 15px; background: rgba(255,255,255,0.05); max-width: 500px; margin: auto; }
-        h1 { letter-spacing: 5px; text-shadow: 0 0 10px #d4af37; margin-bottom: 2px; }
-        .precision-tag { font-size: 0.7rem; letter-spacing: 2px; color: #888; margin-bottom: 20px; display: block; }
         .form-group { text-align: left; width: 90%; margin: auto; margin-bottom: 15px; }
         label { font-size: 0.75rem; text-transform: uppercase; color: #d4af37; display: block; margin-bottom: 5px; }
-        input { padding: 12px; border-radius: 5px; border: 1px solid #d4af37; background: #1a1a2e; color: white; width: 100%; font-size: 1rem; box-sizing: border-box; }
-        button { background: #4b0082; color: white; padding: 15px; border: none; border-radius: 50px; cursor: pointer; font-size: 1.1rem; width: 95%; margin-top: 15px; box-shadow: 0 0 15px #6a0dad; }
-        .btn-print { background: #2e8b57; margin-top: 10px; font-size: 0.9rem; }
+        input { padding: 12px; border-radius: 5px; border: 1px solid #d4af37; background: #1a1a2e; color: white; width: 100%; box-sizing: border-box; }
+        button { background: #4b0082; color: white; padding: 15px; border: none; border-radius: 50px; cursor: pointer; width: 95%; margin-top: 15px; font-weight: bold; }
+        .btn-print { background: #2e8b57; }
         #babaji-text { margin-top: 25px; font-style: italic; min-height: 80px; line-height: 1.6; color: #eee; padding: 15px; border-top: 1px dashed #444; white-space: pre-wrap; text-align: left; }
         
-        /* PRINT LOGIC: Hides everything except the message */
         @media print {
-            body { background: white !important; color: black !important; padding: 0; }
-            .cosmic-box, button, input, label, h1, .precision-tag, .subtitle { display: none !important; }
+            @page { margin: 2cm; }
+            body { background: white !important; color: black !important; }
+            .cosmic-box, button, input, label, h1 { display: none !important; }
             #babaji-text { 
                 display: block !important; 
-                visibility: visible; 
                 color: black !important; 
-                border: 10px double #d4af37 !important; 
-                padding: 40px; 
+                border: 4px double #000 !important; 
+                padding: 20px; 
                 font-family: 'Times New Roman', serif;
-                font-size: 1.4rem;
-                margin: 0;
+                font-size: 1.2rem;
             }
             #babaji-text::before {
                 content: "BABAJI'S COSMIC INSIGHT";
-                display: block;
-                text-align: center;
-                font-size: 2rem;
-                border-bottom: 2px solid black;
-                margin-bottom: 30px;
+                display: block; text-align: center; font-weight: bold; margin-bottom: 20px; border-bottom: 1px solid #000;
             }
         }
     </style>
 </head>
 <body>
-
     <div class="cosmic-box">
         <h1>ASK BABAJI</h1>
-        <span class="precision-tag">130 LANGUAGES • ACCURATE HOUSES</span>
-        
-        <div class="form-group"><label>Name</label><input type="text" id="name" placeholder="Name"></div>
+        <div class="form-group"><label>Name</label><input type="text" id="name"></div>
         <div class="form-group"><label>Date of Birth</label><input type="date" id="dob"></div>
-        <div class="form-group"><label>Time of Arrival (Crucial)</label><input type="time" id="tob"></div>
-        <div class="form-group"><label>City of Birth</label><input type="text" id="location" placeholder="City, Country"></div>
-        
+        <div class="form-group"><label>Time of Arrival</label><input type="time" id="tob"></div>
+        <div class="form-group"><label>City of Birth</label><input type="text" id="loc"></div>
         <button onclick="getInsights()">Seek Cosmic Creaminess</button>
-        <button onclick="printInsight()" class="btn-print">Print for Contemplation</button>
-
-        <div id="babaji-text">Babaji is waiting for your specific arrival time...</div>
-        <div id="status" style="font-size:0.8rem; color:#888; margin-top:15px;"></div>
+        <button onclick="window.print()" class="btn-print">Print for Contemplation</button>
+        <div id="babaji-text">Babaji is waiting for your coordinates...</div>
     </div>
 
     <script>
-        let queryCount = parseInt(localStorage.getItem('babaji_limit')) || 0;
-        updateStatus();
-
-        function updateStatus() {
-            const s = document.getElementById('status');
-            s.innerText = queryCount >= 3 ? "FREE ACCESS DEPLETED." : "Insights used: " + queryCount + " of 3";
-        }
-
         async function getInsights() {
             const name = document.getElementById('name').value;
             const dob = document.getElementById('dob').value;
             const tob = document.getElementById('tob').value;
-            const loc = document.getElementById('location').value;
+            const loc = document.getElementById('loc').value;
             const output = document.getElementById('babaji-text');
 
-            if (queryCount >= 3) {
-                output.innerHTML = "The portal is closed, " + name + ".<br><br><span style='color: #00ff00;'>Donate $3.00 to see deeper.</span>";
-                return;
-            }
-
-            if (!name || !dob || !tob || !loc) {
-                alert("Babaji needs ALL coordinates—especially the TIME.");
-                return;
-            }
-
-            output.innerText = "Dredging the silt of your arrival...";
+            if (!name || !dob || !tob || !loc) return alert("Babaji needs all coordinates!");
+            output.innerText = "Dredging the silt...";
 
             try {
-                const response = await fetch('/api/babaji', {
+                const res = await fetch('/api/babaji', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ name, dob, tob, loc })
                 });
-                const data = await response.json();
+                const data = await res.json();
                 
-                if (data.reading) {
-                    // TYPEWRITER EFFECT
-                    let i = 0;
-                    output.innerText = "";
-                    function typeWriter() {
-                        if (i < data.reading.length) {
-                            output.innerText += data.reading.charAt(i);
-                            i++;
-                            setTimeout(typeWriter, 25);
-                        }
+                // TYPEWRITER
+                let i = 0;
+                output.innerText = "";
+                function type() {
+                    if (i < data.reading.length) {
+                        output.innerText += data.reading.charAt(i);
+                        i++;
+                        setTimeout(type, 20);
                     }
-                    typeWriter();
-
-                    queryCount++;
-                    localStorage.setItem('babaji_limit', queryCount);
-                    updateStatus();
                 }
-            } catch (e) {
-                output.innerText = "The connection is flickering.";
-            }
-        }
-
-        function printInsight() {
-            const text = document.getElementById('babaji-text').innerText;
-            if (text.length < 50) return alert("Nothing to print yet.");
-            window.print();
+                type();
+            } catch (e) { output.innerText = "Connection flickering."; }
         }
     </script>
 </body>
