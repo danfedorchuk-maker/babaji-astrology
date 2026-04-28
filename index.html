@@ -5,92 +5,99 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Babaji Astrology</title>
     <style>
-        body { background: #0b0b1a; color: #d4af37; font-family: 'Courier New', Courier, monospace; text-align: center; padding: 20px; }
+        body { background: #0b0b1a; color: #d4af37; font-family: 'Courier New', Courier, monospace; text-align: center; padding: 20px; margin: 0; }
         .cosmic-box { border: 2px solid #d4af37; padding: 20px; border-radius: 15px; background: rgba(255,255,255,0.05); max-width: 500px; margin: auto; }
+        h1 { letter-spacing: 5px; text-shadow: 0 0 10px #d4af37; margin-bottom: 2px; }
+        .precision-tag { font-size: 0.7rem; letter-spacing: 2px; color: #888; margin-bottom: 20px; display: block; }
         .form-group { text-align: left; width: 90%; margin: auto; margin-bottom: 15px; }
         label { font-size: 0.75rem; text-transform: uppercase; color: #d4af37; display: block; margin-bottom: 5px; }
         input { padding: 12px; border-radius: 5px; border: 1px solid #d4af37; background: #1a1a2e; color: white; width: 100%; box-sizing: border-box; }
-        button { background: #4b0082; color: white; padding: 15px; border: none; border-radius: 50px; cursor: pointer; width: 95%; margin-top: 15px; font-weight: bold; }
-        .btn-print { background: #2e8b57; }
+        button { background: #4b0082; color: white; padding: 15px; border: none; border-radius: 50px; cursor: pointer; font-size: 1.1rem; width: 95%; margin-top: 15px; box-shadow: 0 0 15px #6a0dad; }
         #babaji-text { margin-top: 25px; font-style: italic; min-height: 80px; line-height: 1.6; color: #eee; padding: 15px; border-top: 1px dashed #444; white-space: pre-wrap; text-align: left; }
-        
-        /* THE PRINT FIX */
-        @media print {
-            @page { margin: 1in; }
-            body { background: white !important; color: black !important; }
-            .cosmic-box, button, input, label, h1 { display: none !important; }
-            #babaji-text { 
-                display: block !important; 
-                visibility: visible !important;
-                color: black !important; 
-                border: 3px double #000 !important; 
-                padding: 30px; 
-                font-family: 'Times New Roman', serif;
-                font-size: 1.2rem;
-                background: white !important;
-            }
-            #babaji-text::before {
-                content: "BABAJI'S COSMIC INSIGHT";
-                display: block; text-align: center; font-weight: bold; font-size: 1.5rem; margin-bottom: 20px; border-bottom: 2px solid #000;
-            }
-        }
+        .reset-link { font-size: 0.6rem; color: #333; margin-top: 30px; cursor: pointer; display: block; text-decoration: none; }
     </style>
 </head>
 <body>
+
     <div class="cosmic-box">
         <h1>ASK BABAJI</h1>
-        <div class="form-group"><label>Name</label><input type="text" id="name"></div>
+        <span class="precision-tag">130 LANGUAGES • ACCURATE HOUSES</span>
+        
+        <div class="form-group"><label>Seeker's Name</label><input type="text" id="name" placeholder="Name"></div>
         <div class="form-group"><label>Date of Birth</label><input type="date" id="dob"></div>
         <div class="form-group"><label>Time of Arrival</label><input type="time" id="tob"></div>
-        <div class="form-group"><label>City of Birth</label><input type="text" id="loc"></div>
+        <div class="form-group"><label>City of Birth</label><input type="text" id="location" placeholder="City, Country"></div>
+        
         <button onclick="getInsights()">Seek Cosmic Creaminess</button>
-        <button onclick="handlePrint()" class="btn-print">Print for Contemplation</button>
+
         <div id="babaji-text">Babaji is waiting for your coordinates...</div>
+        <div id="status" style="font-size:0.8rem; color:#888; margin-top:15px;"></div>
+        
+        <a class="reset-link" onclick="resetTries()">[ Admin Reset ]</a>
     </div>
 
     <script>
-        let fullReading = ""; // Store reading here so we can bypass typewriter for print
+        let queryCount = parseInt(localStorage.getItem('babaji_limit')) || 0;
+        updateStatus();
+
+        function updateStatus() {
+            const s = document.getElementById('status');
+            s.innerText = queryCount >= 3 ? "FREE ACCESS DEPLETED." : "Insights used: " + queryCount + " of 3";
+        }
+
+        function resetTries() {
+            queryCount = 0;
+            localStorage.setItem('babaji_limit', 0);
+            updateStatus();
+            document.getElementById('babaji-text').innerText = "Babaji is ready again.";
+        }
 
         async function getInsights() {
             const name = document.getElementById('name').value;
             const dob = document.getElementById('dob').value;
             const tob = document.getElementById('tob').value;
-            const loc = document.getElementById('loc').value;
+            const loc = document.getElementById('location').value;
             const output = document.getElementById('babaji-text');
 
-            if (!name || !dob || !tob || !loc) return alert("Babaji needs all coordinates!");
-            output.innerText = "Dredging the silt...";
+            if (queryCount >= 3) {
+                output.innerHTML = "The portal is closed, " + name + ".<br><br><span style='color: #00ff00;'>Donate $3.00 to see deeper.</span>";
+                return;
+            }
+
+            if (!name || !dob || !tob || !loc) {
+                alert("Babaji needs ALL coordinates—especially the TIME.");
+                return;
+            }
+
+            output.innerText = "Dredging the silt of your arrival...";
 
             try {
-                const res = await fetch('/api/babaji', {
+                const response = await fetch('/api/babaji', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ name, dob, tob, loc })
                 });
-                const data = await res.json();
-                fullReading = data.reading;
+                const data = await response.json();
                 
-                // TYPEWRITER EFFECT
-                let i = 0;
-                output.innerText = "";
-                function type() {
-                    if (i < fullReading.length) {
-                        output.innerText += fullReading.charAt(i);
-                        i++;
-                        setTimeout(type, 20);
+                if (data.reading) {
+                    let i = 0;
+                    output.innerText = "";
+                    function typeWriter() {
+                        if (i < data.reading.length) {
+                            output.innerText += data.reading.charAt(i);
+                            i++;
+                            setTimeout(typeWriter, 25);
+                        }
                     }
-                }
-                type();
-            } catch (e) { output.innerText = "Connection flickering."; }
-        }
+                    typeWriter();
 
-        function handlePrint() {
-            const output = document.getElementById('babaji-text');
-            if (!fullReading) return alert("Babaji has not spoken yet!");
-            
-            // Force the full text into the box immediately before printing
-            output.innerText = fullReading; 
-            window.print();
+                    queryCount++;
+                    localStorage.setItem('babaji_limit', queryCount);
+                    updateStatus();
+                }
+            } catch (e) {
+                output.innerText = "The connection is flickering.";
+            }
         }
     </script>
 </body>
