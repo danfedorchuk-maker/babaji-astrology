@@ -111,28 +111,43 @@
         }
 
         function printInsight() {
-            const name = document.getElementById('name').value || "Seeker";
-            const insight = document.getElementById('babaji-text').innerText;
-            const printWindow = window.open('', '_blank');
-            printWindow.document.write(`
-                <html>
-                    <head>
-                        <title>Babaji's Cosmic Insight</title>
-                        <style>
-                            body { font-family: 'Times New Roman', serif; padding: 50px; text-align: center; border: 10px double #d4af37; color: #000; background: #fff; }
-                            h1 { color: #4b0082; border-bottom: 2px solid #d4af37; padding-bottom: 10px; }
-                            .content { font-size: 1.3rem; margin-top: 30px; line-height: 1.6; font-style: italic; white-space: pre-wrap; text-align: left; }
-                            .footer { margin-top: 50px; font-size: 0.8rem; color: #666; border-top: 1px solid #eee; padding-top: 20px; }
-                        </style>
-                    </head>
-                    <body>
-                        <h1>A Message for ${name}</h1>
-                        <div class="content">${insight}</div>
-                        <div class="footer">Documented via Babaji Astrology. The stars do not lie.</div>
-                        <script>window.print();<\/script>
-                    </body>
-                </html>
-            `);
+           function printInsight() {
+    const insight = document.getElementById('babaji-text').innerText;
+    if (insight.includes("waiting") || insight === "") {
+        alert("Babaji has not spoken yet. You cannot print silence.");
+        return;
+    }
+
+    // This creates a print-only style on the fly
+    const style = document.createElement('style');
+    style.innerHTML = `
+        @media print {
+            body * { visibility: hidden; }
+            #babaji-text, #babaji-text * { visibility: visible; color: black !important; }
+            #babaji-text { 
+                position: absolute; 
+                left: 0; top: 0; 
+                width: 100%; 
+                padding: 40px;
+                border: 5px double #d4af37;
+                font-family: 'Times New Roman', serif;
+                font-size: 1.2rem;
+                text-align: center;
+            }
+            #babaji-text::before {
+                content: "BABAJI'S COSMIC INSIGHT";
+                display: block;
+                font-weight: bold;
+                font-size: 2rem;
+                margin-bottom: 20px;
+                border-bottom: 2px solid #000;
+            }
+        }
+    `;
+    document.head.appendChild(style);
+    window.print();
+    document.head.removeChild(style); // Clean up after
+}
             printWindow.document.close();
         }
     </script>
