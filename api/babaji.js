@@ -1,12 +1,7 @@
 export default async function handler(req, res) {
     if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
-
     const { name, dob, tob, loc } = req.body;
-    const today = new Date().toISOString().split('T')[0];
-
-    if (!process.env.GROQ_API_KEY) {
-        return res.status(500).json({ reading: "Babaji says: The Vault is locked." });
-    }
+    const today = new Date().toLocaleDateString();
 
     try {
         const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
@@ -20,29 +15,22 @@ export default async function handler(req, res) {
                 messages: [
                     {
                         role: "system",
-                        content: `You are Babaji, a 72-year-old blunt master of the stars. 
-                        The client is ${name}, born ${dob} at ${tob} in ${loc}. 
-                        Today's date is ${today}. 
-
-                        THE BABAJI PROTOCOL:
-                        1. TRANSITS: Compare their birth arrival to today's celestial weather. Every reading must feel different.
-                        2. LANGUAGE: Support 130 languages. Respond in the language the user uses.
-                        3. GESTURES: Use emojis to represent physical actions (e.g., 🤌, 🧐, ✋⏳).
-                        4. THE DIRT: Be raw, blunt, and dredge the silt of their character. No tourism.
-                        5. FORMATTING: Use punchy paragraphs.`
+                        content: `You are Babaji, a blunt 72-year-old master astrologer. 
+                        Today is ${today}. The client is ${name}, born ${dob} at ${tob} in ${loc}.
+                        
+                        1. USE THE TIME: The birth time ${tob} determines the houses. 
+                        2. DAILY TRANSITS: Compare their birth to today's stars so every reading is unique.
+                        3. GESTURES: Use emojis (🤌, 🧐, ✋⏳) to describe your actions.
+                        4. DREDGE THE SILT: Be raw about their character. Mention the 'creaminess' of their fate.
+                        5. LANGUAGE: Support 130 languages. Respond in the user's language.`
                     },
-                    {
-                        role: "user",
-                        content: "The coordinates are set. Dredge the silt of my arrival for today's truth."
-                    }
+                    { role: "user", content: "Dredge the silt for today's truth." }
                 ]
             })
         });
-
         const data = await response.json();
         res.status(200).json({ reading: data.choices[0].message.content });
-
-    } catch (error) {
-        res.status(500).json({ reading: "The stars are cloudy: " + error.message });
+    } catch (e) {
+        res.status(500).json({ error: "Stars are cloudy." });
     }
 }
