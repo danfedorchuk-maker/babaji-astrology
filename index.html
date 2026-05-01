@@ -13,7 +13,24 @@
         label { font-size: 0.75rem; text-transform: uppercase; color: #d4af37; display: block; margin-bottom: 5px; }
         input { padding: 12px; border-radius: 5px; border: 1px solid #d4af37; background: #1a1a2e; color: white; width: 100%; box-sizing: border-box; }
         button { background: #4b0082; color: white; padding: 15px; border: none; border-radius: 50px; cursor: pointer; font-size: 1.1rem; width: 95%; margin-top: 15px; box-shadow: 0 0 15px #6a0dad; }
-        #babaji-text { margin-top: 25px; font-style: italic; min-height: 80px; line-height: 1.6; color: #eee; padding: 15px; border-top: 1px dashed #444; white-space: pre-wrap; text-align: left; }
+        
+        /* TABS SYSTEM */
+        .tab-container { display: none; margin-top: 20px; }
+        .tab-menu { display: flex; justify-content: space-around; border-bottom: 1px solid #444; margin-bottom: 15px; }
+        .tab-link { padding: 10px; font-size: 0.7rem; cursor: pointer; color: #888; text-transform: uppercase; letter-spacing: 1px; }
+        .tab-link.active { color: #d4af37; border-bottom: 2px solid #d4af37; font-weight: bold; }
+        .tab-content { display: none; text-align: left; animation: fadeIn 0.5s; }
+        .tab-content.active { display: block; }
+
+        #babaji-text { font-style: italic; min-height: 80px; line-height: 1.6; color: #eee; padding: 15px; white-space: pre-wrap; }
+        
+        /* DATA TABLES */
+        table { width: 100%; border-collapse: collapse; font-size: 0.8rem; color: #eee; margin-top: 10px; }
+        th { text-align: left; color: #d4af37; font-size: 0.65rem; text-transform: uppercase; border-bottom: 1px solid #444; padding: 5px; }
+        td { padding: 8px 5px; border-bottom: 1px solid #222; }
+        .aspect-tag { color: #00ff00; font-size: 0.75rem; display: block; margin-bottom: 5px; font-family: sans-serif; }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         .reset-link { font-size: 0.6rem; color: #333; margin-top: 30px; cursor: pointer; display: block; text-decoration: none; }
     </style>
 </head>
@@ -30,15 +47,46 @@
         
         <button onclick="getInsights()">Seek Cosmic Creaminess</button>
 
-        <div id="babaji-text">Babaji is waiting for your coordinates...</div>
+        <!-- DASHBOARD AREA -->
+        <div id="results-area" class="tab-container">
+            <div class="tab-menu">
+                <div class="tab-link active" onclick="switchTab('narrative', this)">Narrative</div>
+                <div class="tab-link" onclick="switchTab('technical', this)">Hardware</div>
+                <div class="tab-link" onclick="switchTab('aspects', this)">Aspects</div>
+            </div>
+
+            <div id="narrative" class="tab-content active">
+                <div id="babaji-text">Dredging the silt...</div>
+            </div>
+
+            <div id="technical" class="tab-content">
+                <table>
+                    <thead>
+                        <tr><th>Planet</th><th>Sign</th><th>Degree</th><th>House</th></tr>
+                    </thead>
+                    <tbody id="chart-body"></tbody>
+                </table>
+            </div>
+
+            <div id="aspects" class="tab-content">
+                <div id="aspect-list" style="padding:10px;"></div>
+            </div>
+        </div>
+
         <div id="status" style="font-size:0.8rem; color:#888; margin-top:15px;"></div>
-        
         <a class="reset-link" onclick="resetTries()">[ Admin Reset ]</a>
     </div>
 
     <script>
         let queryCount = parseInt(localStorage.getItem('babaji_limit')) || 0;
         updateStatus();
+
+        function switchTab(tabId, el) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-link').forEach(l => l.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            el.classList.add('active');
+        }
 
         function updateStatus() {
             const s = document.getElementById('status');
@@ -49,7 +97,7 @@
             queryCount = 0;
             localStorage.setItem('babaji_limit', 0);
             updateStatus();
-            document.getElementById('babaji-text').innerText = "Babaji is ready again.";
+            location.reload();
         }
 
         async function getInsights() {
@@ -58,18 +106,20 @@
             const tob = document.getElementById('tob').value;
             const loc = document.getElementById('location').value;
             const output = document.getElementById('babaji-text');
+            const resultsArea = document.getElementById('results-area');
 
             if (queryCount >= 3) {
-                output.innerHTML = "The portal is closed, " + name + ".<br><br><span style='color: #00ff00;'>Donate $3.00 to see deeper.</span>";
+                output.innerHTML = "The portal is closed.<br><span style='color: #00ff00;'>Donate $3.00 to see deeper.</span>";
                 return;
             }
 
             if (!name || !dob || !tob || !loc) {
-                alert("Babaji needs ALL coordinates—especially the TIME.");
+                alert("Babaji needs ALL coordinates.");
                 return;
             }
 
-            output.innerText = "Dredging the silt of your arrival...";
+            resultsArea.style.display = 'block';
+            output.innerText = "Consulting the vault...";
 
             try {
                 const response = await fetch('/api/babaji', {
@@ -80,23 +130,36 @@
                 const data = await response.json();
                 
                 if (data.reading) {
-                    let i = 0;
-                    output.innerText = "";
-                    function typeWriter() {
+                    // Narrative Typing
+                    let i = 0; output.innerText = "";
+                    function type() {
                         if (i < data.reading.length) {
-                            output.innerText += data.reading.charAt(i);
-                            i++;
-                            setTimeout(typeWriter, 25);
+                            output.innerText += data.reading.charAt(i); i++;
+                            setTimeout(type, 20);
                         }
                     }
-                    typeWriter();
+                    type();
+
+                    // Hardware Table (Planets, Chiron, Nodes)
+                    const body = document.getElementById('chart-body');
+                    body.innerHTML = "";
+                    data.planets.forEach(p => {
+                        body.innerHTML += `<tr><td>${p.name}</td><td>${p.sign}</td><td>${p.degree}°</td><td>${p.house}</td></tr>`;
+                    });
+
+                    // Aspects List
+                    const aspectDiv = document.getElementById('aspect-list');
+                    aspectDiv.innerHTML = "";
+                    data.aspects.forEach(a => {
+                        aspectDiv.innerHTML += `<span class="aspect-tag">⌬ ${a.p1} ${a.type} ${a.p2}</span>`;
+                    });
 
                     queryCount++;
                     localStorage.setItem('babaji_limit', queryCount);
                     updateStatus();
                 }
             } catch (e) {
-                output.innerText = "The connection is flickering.";
+                output.innerText = "The stars are obscured by clouds.";
             }
         }
     </script>
