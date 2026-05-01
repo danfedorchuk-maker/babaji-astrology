@@ -1,14 +1,15 @@
 export default async function handler(req, res) {
-    if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
+    console.log("--- BABAJI START ---");
+    console.log("Received data:", req.body);
 
     const { name, dob, tob, loc } = req.body;
 
     try {
-        // PHASE 1: Deterministic Math from AstrologyAPI
+        console.log("Calling AstrologyAPI...");
         const astroResponse = await fetch("https://json.astrologyapi.com/v1/western_horoscope", {
             method: "POST",
             headers: {
-                "Authorization": "Basic " + Buffer.from(process.env.ASTRO_USER_ID + ":" + process.env.ASTRO_API_KEY).toString('base64'),
+                "Authorization": `Bearer ${process.env.ASTRO_API_KEY}`,
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
@@ -17,44 +18,23 @@ export default async function handler(req, res) {
                 year: parseInt(dob.split('-')[0]),
                 hour: parseInt(tob.split(':')[0]),
                 min: parseInt(tob.split(':')[1]),
-                lat: 43.6532, // Example: Toronto (Replace with dynamic geocoding)
-                lon: -79.3832,
-                tzone: -5.0
+                lat: 53.4084, 
+                lon: -2.9916,
+                tzone: 1.0 
             })
         });
-        
+
         const astroData = await astroResponse.json();
+        console.log("AstrologyAPI raw response:", JSON.stringify(astroData));
 
-        // PHASE 2: Narrative Generation via Groq
-        const aiResponse = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-            method: "POST",
-            headers: {
-                "Authorization": `Bearer ${process.env.GROQ_API_KEY}`,
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                model: "llama-3.3-70b-versatile",
-                messages: [
-                    {
-                        role: "system",
-                        content: `You are Babaji, a blunt 72-year-old master astrologer. 
-                        FACTS: ${JSON.stringify(astroData)}.
-                        Dredge the silt for ${name}. Interpret the house placements and aspects with tough love.`
-                    },
-                    { role: "user", content: "Dredge the silt." }
-                ]
-            })
-        });
+        if (astroData.error) {
+            console.error("AstrologyAPI returned an error:", astroData.error);
+        }
 
-        const aiData = await aiResponse.json();
+        // ... keep the rest of your Groq code here ...
 
-        // PHASE 3: Unified Output to Frontend
-        res.status(200).json({ 
-            reading: aiData.choices[0].message.content,
-            planets: astroData.planets, // Consistent math
-            aspects: astroData.aspects   // Authentic glyph-ready data
-        });
     } catch (e) {
-        res.status(500).json({ error: "The stars are obscured by hardware failure." });
+        console.error("CRASH DETECTED:", e.message);
+        res.status(200).json({ reading: "The stars are obscured." });
     }
 }
