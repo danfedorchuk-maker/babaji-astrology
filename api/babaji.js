@@ -1,12 +1,16 @@
 export default async function handler(req, res) {
-    console.log("--- BABAJI START ---");
+    console.log("--- BABAJI UNIVERSAL START ---");
+
     try {
-        const { dob, tob } = req.body;
-        const dateParts = dob.split('/'); 
+        const { dob, tob, loc } = req.body;
         
-        // AUTH CHECK: Using the keys you added in Screenshot from 2026-05-01 00-23-10.jpg
+        // 1. DYNAMIC DATE PARSING: Handles 10/09/1940 or 05/22/1953
+        const dateParts = dob.includes('/') ? dob.split('/') : dob.split('-');
+        
+        // 2. SECURITY HANDSHAKE: Using the IDs you added to Vercel
         const authString = Buffer.from(`${process.env.ASTRO_USER_ID}:${process.env.ASTRO_API_KEY}`).toString('base64');
 
+        // 3. THE REQUEST: Sending the specific user's data
         const astroResponse = await fetch("https://json.astrologyapi.com/v1/western_horoscope", {
             method: "POST",
             headers: {
@@ -14,26 +18,27 @@ export default async function handler(req, res) {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                day: parseInt(dateParts[0]),
-                month: parseInt(dateParts[1]),
+                day: parseInt(dateParts[1]),   // Month
+                month: parseInt(dateParts[0]), // Day
                 year: parseInt(dateParts[2]),
                 hour: parseInt(tob.split(':')[0]),
                 min: parseInt(tob.split(':')[1]),
-                lat: 53.4084, 
-                lon: -2.9916,
-                tzone: 1.0 
+                lat: 43.6532, // Note: For a fully dynamic city, you'll eventually need a Geocoding API
+                lon: -79.3832,
+                tzone: -4.0   
             })
         });
 
         const astroData = await astroResponse.json();
 
-        // VALIDATION: This stops the "silent failure"
-        if (astroData.error || !astroData.planets) {
+        // 4. ERROR HANDLING: If the API rejects the user's specific data
+        if (!astroData.planets) {
             return res.status(200).json({ 
-                reading: `HARDWARE ERROR: ${astroData.msg || "Check your AstrologyAPI keys."}` 
+                reading: `HARDWARE ERROR: ${astroData.msg || "The vault rejected these coordinates or date."}` 
             });
         }
 
+        // 5. NARRATIVE GENERATION: Groq interprets the unique chart
         const groqResponse = await fetch("https://api.groq.com/openai/v1/chat/completions", {
             method: "POST",
             headers: {
@@ -42,7 +47,7 @@ export default async function handler(req, res) {
             },
             body: JSON.stringify({
                 model: "llama-3.3-70b-versatile",
-                messages: [{ role: "system", content: "You are Babaji. Interpret: " + JSON.stringify(astroData) }]
+                messages: [{ role: "system", content: "You are Babaji. Interpret this specific birth chart: " + JSON.stringify(astroData) }]
             })
         });
 
@@ -54,6 +59,7 @@ export default async function handler(req, res) {
         });
 
     } catch (e) {
-        res.status(200).json({ reading: "SYSTEM CRASH: " + e.message });
+        console.error("PIPELINE CRASH:", e.message);
+        res.status(200).json({ reading: "The stars are obscured by: " + e.message });
     }
 }
