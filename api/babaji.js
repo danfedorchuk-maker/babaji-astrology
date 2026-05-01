@@ -1,5 +1,5 @@
 export default async function handler(req, res) {
-    // Handling CORS for your Vercel deployment
+    // Standard CORS headers for Vercel
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -8,7 +8,8 @@ export default async function handler(req, res) {
     if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
 
     const { name, dob, tob, loc } = req.body;
-    const today = new Date().toLocaleDateString('en-CA'); // Localized for Surrey, BC
+    // Localized date for your current location in BC
+    const today = new Date().toLocaleDateString('en-CA'); 
 
     try {
         const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
@@ -27,11 +28,11 @@ export default async function handler(req, res) {
                         Context: Today is ${today}. Client: ${name}, born ${dob} at ${tob} in ${loc}.
                         
                         Strict Instructions:
-                        1. USE THE TIME: Use ${tob} to specifically mention house placements (e.g., 'Your Saturn in the 12th house...').
-                        2. DREDGE THE SILT: Be specific about character flaws and hidden strengths. Use a 'tough love' approach.
-                        3. AUDIO OPTIMIZATION: Write in short, rhythmic sentences that sound natural when spoken by an old man's voice.
-                        4. NO CLICHÉS: Avoid overused 'cosmic' words. Use 'Hardware' or 'The Vault' to refer to their chart.
-                        5. SPECIFICITY: Mention a specific transit happening today based on the date ${today}.`
+                        1. USE THE TIME: Use ${tob} to specifically mention house placements.
+                        2. DREDGE THE SILT: Be specific about character flaws and hidden strengths. Use 'tough love'.
+                        3. STRUCTURE: Write in short, rhythmic sentences. No emojis.
+                        4. NO CLICHÉS: Use 'Hardware' or 'The Vault' to refer to their chart.
+                        5. SPECIFICITY: Mention a specific transit happening based on ${today}.`
                     },
                     { role: "user", content: "Dredge the silt for today's truth." }
                 ],
@@ -41,7 +42,7 @@ export default async function handler(req, res) {
 
         const data = await response.json();
 
-        // Safety check to prevent "Initializing" hangs or 500 crashes
+        // Safety check to prevent crashes if the API response is malformed
         if (!data.choices || !data.choices[0]) {
             console.error("Groq API Error:", data);
             return res.status(500).json({ error: "The vault is locked. Check runtime logs." });
