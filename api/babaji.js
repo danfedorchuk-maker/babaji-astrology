@@ -1,16 +1,41 @@
 export default async function handler(req, res) {
     console.log("--- BABAJI UNIVERSAL START ---");
-
     try {
-        const { dob, tob, loc } = req.body;
-        
-        // 1. DYNAMIC DATE PARSING: Handles 10/09/1940 or 05/22/1953
-        const dateParts = dob.includes('/') ? dob.split('/') : dob.split('-');
-        
-        // 2. SECURITY HANDSHAKE: Using the IDs you added to Vercel
-        const authString = Buffer.from(`${process.env.ASTRO_USER_ID}:${process.env.ASTRO_API_KEY}`).toString('base64');
+        const { name, dob, tob, loc } = req.body;
 
-        // 3. THE REQUEST: Sending the specific user's data
+        // 1. DATE PARSING — handles both YYYY-MM-DD (HTML date input) and MM/DD/YYYY
+        let day, month, year;
+        if (dob.includes('-')) {
+            [year, month, day] = dob.split('-').map(Number);  // HTML5 date input
+        } else {
+            [month, day, year] = dob.split('/').map(Number);  // Legacy format
+        }
+
+        // 2. GEOCODING — convert birth city to real coordinates
+        const geoRes = await fetch(
+            `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(loc)}&format=json&limit=1`,
+            { headers: { 'User-Agent': 'BabajiAstrology/1.0' } }
+        );
+        const geoData = await geoRes.json();
+        if (!geoData.length) {
+            return res.status(200).json({ reading: "LOCATION ERROR: Could not find coordinates for that city." });
+        }
+        const lat = parseFloat(geoData[0].lat);
+        const lon = parseFloat(geoData[0].lon);
+
+        // 3. TIMEZONE — derive from coordinates
+        const tzRes = await fetch(
+            `https://timezonefinder.michelfe.it/api/0?lng=${lon}&lat=${lat}`
+        );
+        const tzData = await tzRes.json();
+        const tzone = tzData.offset_dst ?? tzData.offset ?? 0;
+
+        // 4. ASTROLOGYAPI AUTH
+        const authString = Buffer.from(
+            `${process.env.ASTRO_USER_ID}:${process.env.ASTRO_API_KEY}`
+        ).toString('base64');
+
+        // 5. FETCH CHART
         const astroResponse = await fetch("https://json.astrologyapi.com/v1/western_horoscope", {
             method: "POST",
             headers: {
@@ -18,27 +43,32 @@ export default async function handler(req, res) {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                day: parseInt(dateParts[1]),   // Month
-                month: parseInt(dateParts[0]), // Day
-                year: parseInt(dateParts[2]),
+                day, month, year,
                 hour: parseInt(tob.split(':')[0]),
                 min: parseInt(tob.split(':')[1]),
-                lat: 43.6532, // Note: For a fully dynamic city, you'll eventually need a Geocoding API
-                lon: -79.3832,
-                tzone: -4.0   
+                lat, lon, tzone
             })
         });
-
         const astroData = await astroResponse.json();
 
-        // 4. ERROR HANDLING: If the API rejects the user's specific data
         if (!astroData.planets) {
-            return res.status(200).json({ 
-                reading: `HARDWARE ERROR: ${astroData.msg || "The vault rejected these coordinates or date."}` 
+            return res.status(200).json({
+                reading: `HARDWARE ERROR: ${astroData.msg || "The vault rejected these coordinates."}`,
+                planets: [],
+                aspects: []
             });
         }
 
-        // 5. NARRATIVE GENERATION: Groq interprets the unique chart
+        // 6. BUILD CURATED CHART SUMMARY FOR BABAJI
+        const planetSummary = astroData.planets
+            .map(p => `${p.name} in ${p.sign} (${p.degree}°) — House ${p.house}`)
+            .join('\n');
+
+        const aspectSummary = (astroData.aspects || [])
+            .map(a => `${a.p1} ${a.type} ${a.p2}`)
+            .join('\n');
+
+        // 7. GROQ NARRATIVE
         const groqResponse = await fetch("https://api.groq.com/openai/v1/chat/completions", {
             method: "POST",
             headers: {
@@ -47,19 +77,41 @@ export default async function handler(req, res) {
             },
             body: JSON.stringify({
                 model: "llama-3.3-70b-versatile",
-                messages: [{ role: "system", content: "You are Babaji. Interpret this specific birth chart: " + JSON.stringify(astroData) }]
+                max_tokens: 800,
+                messages: [
+                    {
+                        role: "system",
+                        content: `You are Babaji — an ancient, grounded cosmic interpreter. 
+Speak in rich, unhurried prose. No bullet points. No fluff. 
+Interpret the seeker's chart as if reading from a worn celestial ledger.
+Reference specific placements. Be precise, poetic, and occasionally wry.`
+                    },
+                    {
+                        role: "user",
+                        content: `Seeker: ${name}\n\nPlanetary Positions:\n${planetSummary}\n\nAspects:\n${aspectSummary}\n\nGive a full natal reading.`
+                    }
+                ]
             })
         });
-
         const aiData = await groqResponse.json();
-        
-        res.status(200).json({ 
-            reading: aiData.choices[0].message.content, 
-            planets: astroData.planets 
+
+        // 8. RESPOND WITH ALL THREE DATA SETS
+        res.status(200).json({
+            reading: aiData.choices[0].message.content,
+            planets: astroData.planets,
+            aspects: (astroData.aspects || []).map(a => ({
+                p1: a.p1,
+                type: a.type,
+                p2: a.p2
+            }))
         });
 
     } catch (e) {
         console.error("PIPELINE CRASH:", e.message);
-        res.status(200).json({ reading: "The stars are obscured by: " + e.message });
+        res.status(200).json({
+            reading: "The stars are obscured by: " + e.message,
+            planets: [],
+            aspects: []
+        });
     }
 }
