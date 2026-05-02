@@ -64,6 +64,9 @@
         .field-label { font-size: 0.7rem; letter-spacing: 2px; color: var(--dusty-rose); display: block; text-align: left; margin-bottom: 5px; font-style: normal; }
         .row { display: flex; gap: 10px; margin-bottom: 20px; }
         .row select { margin-bottom: 0; flex: 1; }
+        .tradition-selector { display: flex; gap: 10px; margin-bottom: 25px; }
+        .tradition-btn { flex: 1; padding: 12px; background: transparent; color: rgba(226,194,117,0.4); border: 1px solid rgba(212,175,55,0.2); cursor: pointer; font-family: 'Cinzel Decorative', serif; font-size: 0.6rem; letter-spacing: 1px; }
+        .tradition-btn.active { color: var(--gold); border-color: var(--gold); background: rgba(212,175,55,0.05); }
         #audio-player { width: 100%; margin-top: 20px; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
@@ -72,6 +75,13 @@
     <div class="cosmic-box">
         <h1>ASK BABAJI</h1>
         <span class="precision-tag">VINTAGE COSMOLOGY • GROUNDED INSIGHT</span>
+
+        <span class="field-label">CHOOSE YOUR TRADITION</span>
+        <div class="tradition-selector">
+            <button class="tradition-btn active" onclick="selectTradition('western', this)">WESTERN</button>
+            <button class="tradition-btn" onclick="selectTradition('indian', this)">INDIAN</button>
+            <button class="tradition-btn" onclick="selectTradition('chinese', this)">CHINESE</button>
+        </div>
         
         <input type="text" id="name" placeholder="Seeker's Name">
 
@@ -92,22 +102,14 @@
                 <option value="11">November</option>
                 <option value="12">December</option>
             </select>
-            <select id="dob-day">
-                <option value="">Day</option>
-            </select>
-            <select id="dob-year">
-                <option value="">Year</option>
-            </select>
+            <select id="dob-day"><option value="">Day</option></select>
+            <select id="dob-year"><option value="">Year</option></select>
         </div>
 
         <span class="field-label">TIME OF ARRIVAL</span>
         <div class="row">
-            <select id="tob-hour">
-                <option value="">Hour</option>
-            </select>
-            <select id="tob-min">
-                <option value="">Min</option>
-            </select>
+            <select id="tob-hour"><option value="">Hour</option></select>
+            <select id="tob-min"><option value="">Min</option></select>
         </div>
 
         <input type="text" id="location" placeholder="City of Birth">
@@ -137,7 +139,14 @@
     </div>
 
     <script>
-        // Populate day dropdown
+        let selectedTradition = 'western';
+
+        function selectTradition(t, el) {
+            selectedTradition = t;
+            document.querySelectorAll('.tradition-btn').forEach(b => b.classList.remove('active'));
+            el.classList.add('active');
+        }
+
         const daySelect = document.getElementById('dob-day');
         for (let i = 1; i <= 31; i++) {
             const opt = document.createElement('option');
@@ -146,7 +155,6 @@
             daySelect.appendChild(opt);
         }
 
-        // Populate year dropdown
         const yearSelect = document.getElementById('dob-year');
         for (let i = 2010; i >= 1900; i--) {
             const opt = document.createElement('option');
@@ -155,7 +163,6 @@
             yearSelect.appendChild(opt);
         }
 
-        // Populate hour dropdown
         const hourSelect = document.getElementById('tob-hour');
         for (let i = 0; i <= 23; i++) {
             const opt = document.createElement('option');
@@ -164,7 +171,6 @@
             hourSelect.appendChild(opt);
         }
 
-        // Populate minute dropdown
         const minSelect = document.getElementById('tob-min');
         for (let i = 0; i <= 55; i += 5) {
             const opt = document.createElement('option');
@@ -189,7 +195,8 @@
                 name: document.getElementById('name').value,
                 dob: `${document.getElementById('dob-year').value}-${document.getElementById('dob-month').value}-${document.getElementById('dob-day').value}`,
                 tob: `${document.getElementById('tob-hour').value}:${document.getElementById('tob-min').value}`,
-                loc: document.getElementById('location').value
+                loc: document.getElementById('location').value,
+                tradition: selectedTradition
             };
 
             try {
@@ -209,11 +216,11 @@
                 }
 
                 const body = document.getElementById('chart-body');
-                body.innerHTML = data.planets.map(p =>
+                body.innerHTML = (data.planets || []).map(p =>
                     `<tr><td>${p.name}</td><td>${p.sign}</td><td>${parseFloat(p.normDegree).toFixed(2)}°</td><td>${p.house}</td></tr>`
                 ).join('');
 
-                document.getElementById('aspect-list').innerHTML = data.aspects.map(a => 
+                document.getElementById('aspect-list').innerHTML = (data.aspects || []).map(a => 
                     `<div style="font-size:0.85rem; margin-bottom:8px; opacity:0.7;">⌬ ${a.p1} ${a.type} ${a.p2}</div>`
                 ).join('');
             } catch (e) {
