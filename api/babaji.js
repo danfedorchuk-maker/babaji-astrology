@@ -24,9 +24,7 @@ if (dob.includes('-')) {
         const lon = parseFloat(geoData[0].lon);
 
         // 3. TIMEZONE — derive from coordinates
-        const tzRes = await fetch(
-            `https://timeapi.io/api/timezone/coordinate?latitude=${lat}&longitude=${lon}`
-        );
+        const tzone = -5.0;
         const tzData = await tzRes.json();
         const tzone = tzData.currentUtcOffset?.seconds ? tzData.currentUtcOffset.seconds / 3600 : 0;
 
