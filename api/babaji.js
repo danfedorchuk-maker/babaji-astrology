@@ -53,7 +53,7 @@ if (dob.includes('-')) {
 
         if (!astroData.planets) {
             return res.status(200).json({
-                reading: `HARDWARE ERROR: ${astroData.msg || "The vault rejected these coordinates."}`,
+                reading: `HARDWARE ERROR: ${JSON.stringify(astroData)}`,
                 planets: [],
                 aspects: []
             });
