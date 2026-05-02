@@ -132,19 +132,23 @@ module.exports = async function handler(req, res) {
 };
 
 async function synthesizeChunked(text, voice, apiKey) {
-    const chunks = splitText(text, 4500);
+    const isMultibyte = /[\u0400-\u04FF\u0900-\u097F\u4E00-\u9FFF\u3040-\u30FF]/.test(text);
+    const chunkSize = isMultibyte ? 1500 : 4500;
+    const chunks = splitText(text, chunkSize);
+    console.log(`TTS: ${chunks.length} chunks, multibyte: ${isMultibyte}`);
     const buffers = [];
-    for (const chunk of chunks) {
+    for (let i = 0; i < chunks.length; i++) {
         const r = await fetch(`https://texttospeech.googleapis.com/v1/text:synthesize?key=${apiKey}`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-                input: { text: chunk },
+                input: { text: chunks[i] },
                 voice,
                 audioConfig: { audioEncoding: "MP3", speakingRate: 0.80, pitch: -2.0 }
             })
         });
         const d = await r.json();
+        console.log(`Chunk ${i+1}: ${d.audioContent ? 'OK' : 'FAILED'} — ${JSON.stringify(d.error || '')}`);
         if (d.audioContent) buffers.push(d.audioContent);
     }
     if (!buffers.length) return null;
