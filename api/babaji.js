@@ -1,3 +1,4 @@
+
 module.exports = async function handler(req, res) {
     console.log("--- BABAJI UNIVERSAL START ---");
     try {
@@ -38,8 +39,9 @@ module.exports = async function handler(req, res) {
             })
         });
         const astroData = await astroResponse.json();
+        const planets = Array.isArray(astroData) ? astroData : astroData.planets;
 
-        if (!astroData.planets) {
+        if (!planets) {
             return res.status(200).json({
                 reading: `HARDWARE ERROR: ${JSON.stringify(astroData)}`,
                 planets: [],
@@ -48,12 +50,8 @@ module.exports = async function handler(req, res) {
         }
 
         // 6. BUILD CHART SUMMARY
-        const planetSummary = astroData.planets
-            .map(p => `${p.name} in ${p.sign} (${p.degree}°) — House ${p.house}`)
-            .join('\n');
-
-        const aspectSummary = (astroData.aspects || [])
-            .map(a => `${a.p1} ${a.type} ${a.p2}`)
+        const planetSummary = planets
+            .map(p => `${p.name} in ${p.sign} (${p.normDegree}°) — House ${p.house}`)
             .join('\n');
 
         // 7. GROQ NARRATIVE
@@ -73,7 +71,7 @@ module.exports = async function handler(req, res) {
                     },
                     {
                         role: "user",
-                        content: `Seeker: ${name}\n\nPlanetary Positions:\n${planetSummary}\n\nAspects:\n${aspectSummary}\n\nGive a full natal reading.`
+                        content: `Seeker: ${name}\n\nPlanetary Positions:\n${planetSummary}\n\nGive a full natal reading.`
                     }
                 ]
             })
@@ -83,12 +81,8 @@ module.exports = async function handler(req, res) {
         // 8. RESPOND
         res.status(200).json({
             reading: aiData.choices[0].message.content,
-            planets: astroData.planets,
-            aspects: (astroData.aspects || []).map(a => ({
-                p1: a.p1,
-                type: a.type,
-                p2: a.p2
-            }))
+            planets: planets,
+            aspects: []
         });
 
     } catch (e) {
