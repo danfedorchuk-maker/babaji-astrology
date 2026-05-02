@@ -5,11 +5,11 @@ export default async function handler(req, res) {
 
         // 1. DATE PARSING — handles both YYYY-MM-DD (HTML date input) and MM/DD/YYYY
         let day, month, year;
-        if (dob.includes('-')) {
-            [year, month, day] = dob.split('-').map(Number);  // HTML5 date input
-        } else {
-            [month, day, year] = dob.split('/').map(Number);  // Legacy format
-        }
+if (dob.includes('-')) {
+    [year, month, day] = dob.split('-').map(Number);
+} else {
+    [month, day, year] = dob.split('/').map(Number);
+}
 
         // 2. GEOCODING — convert birth city to real coordinates
         const geoRes = await fetch(
