@@ -36,7 +36,7 @@ if (dob.includes('-')) {
         ).toString('base64');
 
         // 5. FETCH CHART
-        const astroResponse = await fetch("https://json.astrologyapi.com/v1/western_horoscope", {
+        "https://json.astrologyapi.com/v1/planets"
             method: "POST",
             headers: {
                 "Authorization": `Basic ${authString}`,
