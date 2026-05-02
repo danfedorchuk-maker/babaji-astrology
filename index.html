@@ -59,6 +59,7 @@
         th { text-align: left; padding: 10px 5px; border-bottom: 1px solid rgba(212, 175, 55, 0.2); }
         td { padding: 12px 5px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); color: #ddd; font-size: 0.9rem; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        #audio-player { width: 100%; margin-top: 20px; filter: sepia(1) hue-rotate(10deg); }
     </style>
 </head>
 <body>
@@ -76,7 +77,9 @@
         <div class="divider"></div>
 
         <div id="results-area" style="display:none;">
-            <div class="tab-menu">
+            <audio id="audio-player" controls></audio>
+            
+            <div class="tab-menu" style="margin-top:20px;">
                 <div class="tab-link active" onclick="switchTab('narrative', this)">Narrative</div>
                 <div class="tab-link" onclick="switchTab('technical', this)">Hardware</div>
                 <div class="tab-link" onclick="switchTab('aspects', this)">Aspects</div>
@@ -122,6 +125,12 @@
                 const data = await res.json();
                 
                 output.innerText = data.reading;
+
+                if (data.audio) {
+                    const audioPlayer = document.getElementById('audio-player');
+                    audioPlayer.src = 'data:audio/mp3;base64,' + data.audio;
+                    audioPlayer.play();
+                }
 
                 const body = document.getElementById('chart-body');
                 body.innerHTML = data.planets.map(p =>
