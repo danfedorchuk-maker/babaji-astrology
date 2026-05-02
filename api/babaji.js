@@ -1,4 +1,4 @@
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
     console.log("--- BABAJI UNIVERSAL START ---");
     try {
         const { name, dob, tob, loc } = req.body;
