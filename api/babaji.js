@@ -99,7 +99,7 @@ Reference specific placements. Be precise, poetic, and occasionally wry.`
     } catch (e) {
         console.error("PIPELINE CRASH:", e.message);
         res.status(200).json({
-            reading: "The stars are obscured by: " + e.message,
+            reading: "CRASH: " + e.message + " | " + e.stack,
             planets: [],
             aspects: []
         });
