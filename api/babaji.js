@@ -17,8 +17,7 @@ if (dob.includes('-')) {
 
         // 3. TIMEZONE — derive from coordinates
         const tzone = -5.0;
-        const tzData = await tzRes.json();
-        const tzone = tzData.currentUtcOffset?.seconds ? tzData.currentUtcOffset.seconds / 3600 : 0;
+        
 
         // 4. ASTROLOGYAPI AUTH
         const authString = Buffer.from(
