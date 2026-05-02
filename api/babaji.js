@@ -3,21 +3,20 @@ module.exports = async function handler(req, res) {
     try {
         const { name, dob, tob, loc } = req.body;
 
-        // 1. DATE PARSING — handles both YYYY-MM-DD (HTML date input) and MM/DD/YYYY
+        // 1. DATE PARSING
         let day, month, year;
-if (dob.includes('-')) {
-    [year, month, day] = dob.split('-').map(Number);
-} else {
-    [month, day, year] = dob.split('/').map(Number);
-}
+        if (dob.includes('-')) {
+            [year, month, day] = dob.split('-').map(Number);
+        } else {
+            [month, day, year] = dob.split('/').map(Number);
+        }
 
-       // 2. GEOCODING
+        // 2. GEOCODING
         const lat = 43.6532;
         const lon = -79.3832;
 
-        // 3. TIMEZONE — derive from coordinates
+        // 3. TIMEZONE
         const tzone = -5.0;
-        
 
         // 4. ASTROLOGYAPI AUTH
         const authString = Buffer.from(
@@ -25,7 +24,7 @@ if (dob.includes('-')) {
         ).toString('base64');
 
         // 5. FETCH CHART
-        "https://json.astrologyapi.com/v1/planets"
+        const astroResponse = await fetch("https://json.astrologyapi.com/v1/planets", {
             method: "POST",
             headers: {
                 "Authorization": `Basic ${authString}`,
@@ -48,7 +47,7 @@ if (dob.includes('-')) {
             });
         }
 
-        // 6. BUILD CURATED CHART SUMMARY FOR BABAJI
+        // 6. BUILD CHART SUMMARY
         const planetSummary = astroData.planets
             .map(p => `${p.name} in ${p.sign} (${p.degree}°) — House ${p.house}`)
             .join('\n');
@@ -70,10 +69,7 @@ if (dob.includes('-')) {
                 messages: [
                     {
                         role: "system",
-                        content: `You are Babaji — an ancient, grounded cosmic interpreter. 
-Speak in rich, unhurried prose. No bullet points. No fluff. 
-Interpret the seeker's chart as if reading from a worn celestial ledger.
-Reference specific placements. Be precise, poetic, and occasionally wry.`
+                        content: `You are Babaji — an ancient, grounded cosmic interpreter. Speak in rich, unhurried prose. No bullet points. No fluff. Interpret the seeker's chart as if reading from a worn celestial ledger. Reference specific placements. Be precise, poetic, and occasionally wry.`
                     },
                     {
                         role: "user",
@@ -84,7 +80,7 @@ Reference specific placements. Be precise, poetic, and occasionally wry.`
         });
         const aiData = await groqResponse.json();
 
-        // 8. RESPOND WITH ALL THREE DATA SETS
+        // 8. RESPOND
         res.status(200).json({
             reading: aiData.choices[0].message.content,
             planets: astroData.planets,
@@ -98,7 +94,7 @@ Reference specific placements. Be precise, poetic, and occasionally wry.`
     } catch (e) {
         console.error("PIPELINE CRASH:", e.message);
         res.status(200).json({
-            reading: "CRASH: " + e.message + " | " + e.stack,
+            reading: "CRASH: " + e.message,
             planets: [],
             aspects: []
         });
