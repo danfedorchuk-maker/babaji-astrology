@@ -1,3 +1,6 @@
+Babaji index · HTML
+Copy
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -13,16 +16,16 @@
             --deep-navy: #0b1026;
             --text-gold: #e2c275;
         }
+        * { box-sizing: border-box; }
         body { 
             background: var(--midnight); 
-            background-image: 
-                radial-gradient(circle at center, var(--deep-navy) 0%, var(--midnight) 100%),
-                url('https://www.transparenttextures.com/patterns/stardust.png');
+            background-image: radial-gradient(circle at center, var(--deep-navy) 0%, var(--midnight) 100%);
             color: var(--text-gold); 
             font-family: 'Inter', sans-serif; 
             text-align: center; 
             padding: 40px 20px; 
             margin: 0; 
+            min-height: 100vh;
         }
         .cosmic-box { 
             border: 1px solid rgba(212, 175, 55, 0.2); 
@@ -33,8 +36,21 @@
             margin: auto; 
             box-shadow: 0 10px 50px rgba(0,0,0,0.9);
         }
-        h1 { font-family: 'Cinzel Decorative', serif; letter-spacing: 8px; color: var(--gold); text-transform: uppercase; margin-bottom: 5px; }
-        .precision-tag { font-size: 0.65rem; letter-spacing: 3px; color: var(--dusty-rose); margin-bottom: 30px; display: block; }
+        h1 { 
+            font-family: 'Cinzel Decorative', serif; 
+            letter-spacing: 8px; 
+            color: var(--gold); 
+            text-transform: uppercase; 
+            margin-bottom: 5px;
+            font-size: clamp(1.2rem, 4vw, 1.8rem);
+        }
+        .precision-tag { 
+            font-size: 0.65rem; 
+            letter-spacing: 3px; 
+            color: var(--dusty-rose); 
+            margin-bottom: 30px; 
+            display: block; 
+        }
         label, th { 
             font-family: 'Playfair Display', serif;
             font-size: 0.85rem; 
@@ -43,53 +59,188 @@
             opacity: 0.9;
         }
         input, select { 
-            padding: 14px; border: none; border-bottom: 1px solid rgba(212, 175, 55, 0.3);
-            background: transparent; color: white; width: 100%; box-sizing: border-box; margin-bottom: 20px;
+            padding: 14px; 
+            border: none; 
+            border-bottom: 1px solid rgba(212, 175, 55, 0.3);
+            background: transparent; 
+            color: white; 
+            width: 100%; 
+            margin-bottom: 20px;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            -webkit-appearance: none;
+            appearance: none;
         }
         select option { background: #0b1026; }
+        input::placeholder { color: rgba(255,255,255,0.3); }
         button { 
-            background: transparent; color: var(--gold); padding: 18px; border: 1px solid var(--gold); 
-            cursor: pointer; font-family: 'Cinzel Decorative', serif; width: 100%; margin: 25px 0;
+            background: transparent; 
+            color: var(--gold); 
+            padding: 18px; 
+            border: 1px solid var(--gold); 
+            cursor: pointer; 
+            font-family: 'Cinzel Decorative', serif; 
+            width: 100%; 
+            margin: 25px 0;
+            font-size: 0.75rem;
+            letter-spacing: 2px;
+            transition: all 0.3s ease;
         }
-        .tradition-btn { 
-    width: auto; margin: 0; padding: 12px; font-size: 0.6rem; 
-    color: rgba(226,194,117,0.4); border-color: rgba(212,175,55,0.2);
-}
-.tradition-btn.active { color: var(--gold); border-color: var(--gold); }
+        button:hover { background: rgba(212,175,55,0.08); }
         .divider { border-top: 1px solid rgba(212, 175, 55, 0.1); margin: 30px 0; }
         .tab-menu { display: flex; justify-content: center; gap: 20px; margin-bottom: 25px; }
-        .tab-link { font-size: 0.75rem; cursor: pointer; color: rgba(226, 194, 117, 0.4); text-transform: uppercase; letter-spacing: 2px; padding-bottom: 5px; }
+        .tab-link { 
+            font-size: 0.75rem; 
+            cursor: pointer; 
+            color: rgba(226, 194, 117, 0.4); 
+            text-transform: uppercase; 
+            letter-spacing: 2px; 
+            padding-bottom: 5px;
+            transition: color 0.2s;
+        }
         .tab-link.active { color: var(--gold); border-bottom: 1px solid var(--gold); }
         .tab-content { display: none; text-align: left; animation: fadeIn 1s; }
         .tab-content.active { display: block; }
-        #babaji-text { font-family: 'Playfair Display', serif; font-style: italic; font-size: 1.15rem; line-height: 1.8; color: #eee; padding: 10px; }
+        #babaji-text { 
+            font-family: 'Playfair Display', serif; 
+            font-style: italic; 
+            font-size: 1.1rem; 
+            line-height: 1.9; 
+            color: #eee; 
+            padding: 10px; 
+        }
         table { width: 100%; border-collapse: collapse; margin-top: 10px; }
         th { text-align: left; padding: 10px 5px; border-bottom: 1px solid rgba(212, 175, 55, 0.2); }
         td { padding: 12px 5px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); color: #ddd; font-size: 0.9rem; }
-        .field-label { font-size: 0.7rem; letter-spacing: 2px; color: var(--dusty-rose); display: block; text-align: left; margin-bottom: 5px; font-style: normal; }
+        .field-label { 
+            font-size: 0.7rem; 
+            letter-spacing: 2px; 
+            color: var(--dusty-rose); 
+            display: block; 
+            text-align: left; 
+            margin-bottom: 8px; 
+            font-style: normal; 
+        }
         .row { display: flex; gap: 10px; margin-bottom: 20px; }
         .row select { margin-bottom: 0; flex: 1; }
+ 
+        /* Tradition selector */
         .tradition-selector { display: flex; gap: 10px; margin-bottom: 25px; }
-        .tradition-btn { flex: 1; padding: 12px; background: transparent; color: rgba(226,194,117,0.4); border: 1px solid rgba(212,175,55,0.2); cursor: pointer; font-family: 'Cinzel Decorative', serif; font-size: 0.6rem; letter-spacing: 1px; }
-        .tradition-btn.active { color: var(--gold); border-color: var(--gold); background: rgba(212,175,55,0.05); }
-        #audio-player { width: 100%; margin-top: 20px; }
+        .tradition-btn { 
+            flex: 1; 
+            padding: 12px 6px; 
+            background: transparent; 
+            color: rgba(226,194,117,0.4); 
+            border: 1px solid rgba(212,175,55,0.2); 
+            cursor: pointer; 
+            font-family: 'Cinzel Decorative', serif; 
+            font-size: 0.55rem; 
+            letter-spacing: 1px;
+            margin: 0;
+            width: auto;
+            transition: all 0.3s ease;
+        }
+        .tradition-btn.active { 
+            color: var(--gold); 
+            border-color: var(--gold); 
+            background: rgba(212,175,55,0.05); 
+        }
+ 
+        /* Language override section */
+        .lang-override { margin-bottom: 25px; }
+        .lang-override-btns { display: flex; gap: 8px; margin-top: 8px; }
+        .lang-btn {
+            flex: 1;
+            padding: 10px 4px;
+            background: transparent;
+            color: rgba(226,194,117,0.4);
+            border: 1px solid rgba(212,175,55,0.15);
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.65rem;
+            letter-spacing: 1px;
+            margin: 0;
+            width: auto;
+            transition: all 0.3s ease;
+        }
+        .lang-btn.active {
+            color: var(--gold);
+            border-color: var(--gold);
+            background: rgba(212,175,55,0.05);
+        }
+ 
+        /* Audio */
+        .audio-wrapper {
+            margin-top: 20px;
+            padding: 16px;
+            border: 1px solid rgba(212,175,55,0.15);
+            background: rgba(11,16,38,0.5);
+        }
+        .audio-label {
+            font-size: 0.65rem;
+            letter-spacing: 3px;
+            color: var(--dusty-rose);
+            display: block;
+            margin-bottom: 10px;
+            text-align: left;
+        }
+        #audio-player { 
+            width: 100%; 
+            filter: invert(0.85) sepia(0.3) saturate(0.6);
+        }
+ 
+        /* Loading state */
+        .loading-dots::after {
+            content: '';
+            animation: dots 1.5s steps(4, end) infinite;
+        }
+        @keyframes dots {
+            0%   { content: ''; }
+            25%  { content: '.'; }
+            50%  { content: '..'; }
+            75%  { content: '...'; }
+            100% { content: ''; }
+        }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+ 
+        /* Lang indicator */
+        .lang-indicator {
+            font-size: 0.6rem;
+            letter-spacing: 2px;
+            color: rgba(166, 124, 124, 0.6);
+            margin-bottom: 20px;
+            text-align: left;
+            display: block;
+        }
     </style>
 </head>
 <body>
     <div class="cosmic-box">
         <h1>ASK BABAJI</h1>
         <span class="precision-tag">VINTAGE COSMOLOGY • GROUNDED INSIGHT</span>
-
+ 
         <span class="field-label">CHOOSE YOUR TRADITION</span>
         <div class="tradition-selector">
             <button class="tradition-btn active" onclick="selectTradition('western', this)">WESTERN</button>
             <button class="tradition-btn" onclick="selectTradition('indian', this)">INDIAN</button>
             <button class="tradition-btn" onclick="selectTradition('chinese', this)">CHINESE</button>
         </div>
+ 
+        <!-- Language override for Russian, Hindi, Traditional Chinese -->
+        <div class="lang-override">
+            <span class="field-label">LANGUAGE OVERRIDE (OPTIONAL)</span>
+            <div class="lang-override-btns">
+                <button class="lang-btn" onclick="toggleLangOverride('ru', this)">РУССКИЙ</button>
+                <button class="lang-btn" onclick="toggleLangOverride('hi', this)">हिन्दी</button>
+                <button class="lang-btn" onclick="toggleLangOverride('zh-TW', this)">繁體中文</button>
+                <button class="lang-btn" onclick="toggleLangOverride('auto', this)">AUTO</button>
+            </div>
+        </div>
         
+        <span id="lang-indicator" class="lang-indicator"></span>
+ 
         <input type="text" id="name" placeholder="Seeker's Name">
-
+ 
         <span class="field-label">DATE OF BIRTH</span>
         <div class="row">
             <select id="dob-month">
@@ -110,28 +261,31 @@
             <select id="dob-day"><option value="">Day</option></select>
             <select id="dob-year"><option value="">Year</option></select>
         </div>
-
+ 
         <span class="field-label">TIME OF ARRIVAL</span>
         <div class="row">
             <select id="tob-hour"><option value="">Hour</option></select>
             <select id="tob-min"><option value="">Min</option></select>
         </div>
-
+ 
         <input type="text" id="location" placeholder="City of Birth">
         
         <button onclick="getInsights()">SEEK COSMIC CREAMINESS</button>
-
+ 
         <div class="divider"></div>
-
+ 
         <div id="results-area" style="display:none;">
-            <audio id="audio-player" controls></audio>
+            <div class="audio-wrapper">
+                <span class="audio-label">BABAJI SPEAKS</span>
+                <audio id="audio-player" controls></audio>
+            </div>
             
-            <div class="tab-menu" style="margin-top:20px;">
+            <div class="tab-menu" style="margin-top:24px;">
                 <div class="tab-link active" onclick="switchTab('narrative', this)">Narrative</div>
                 <div class="tab-link" onclick="switchTab('technical', this)">Hardware</div>
                 <div class="tab-link" onclick="switchTab('aspects', this)">Aspects</div>
             </div>
-
+ 
             <div id="narrative" class="tab-content active"><div id="babaji-text"></div></div>
             <div id="technical" class="tab-content">
                 <table>
@@ -142,16 +296,40 @@
             <div id="aspects" class="tab-content"><div id="aspect-list"></div></div>
         </div>
     </div>
-
+ 
     <script>
         let selectedTradition = 'western';
-
+        let langOverride = null; // null = auto-detect
+        let currentAudioUrl = null; // track Blob URL for cleanup
+ 
+        // ── Detect browser language on load ──────────────────────────────────
+        const browserLang = navigator.language || navigator.userLanguage || 'en';
+        updateLangIndicator();
+ 
+        function updateLangIndicator() {
+            const effective = langOverride || browserLang;
+            document.getElementById('lang-indicator').textContent = 
+                `DETECTED LANGUAGE: ${effective.toUpperCase()}`;
+        }
+ 
         function selectTradition(t, el) {
             selectedTradition = t;
             document.querySelectorAll('.tradition-btn').forEach(b => b.classList.remove('active'));
             el.classList.add('active');
         }
-
+ 
+        function toggleLangOverride(code, el) {
+            document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+            if (code === 'auto') {
+                langOverride = null;
+            } else {
+                langOverride = code;
+                el.classList.add('active');
+            }
+            updateLangIndicator();
+        }
+ 
+        // ── Populate selects ──────────────────────────────────────────────────
         const daySelect = document.getElementById('dob-day');
         for (let i = 1; i <= 31; i++) {
             const opt = document.createElement('option');
@@ -159,7 +337,7 @@
             opt.text = i;
             daySelect.appendChild(opt);
         }
-
+ 
         const yearSelect = document.getElementById('dob-year');
         for (let i = 2010; i >= 1900; i--) {
             const opt = document.createElement('option');
@@ -167,7 +345,7 @@
             opt.text = i;
             yearSelect.appendChild(opt);
         }
-
+ 
         const hourSelect = document.getElementById('tob-hour');
         for (let i = 0; i <= 23; i++) {
             const opt = document.createElement('option');
@@ -175,7 +353,7 @@
             opt.text = String(i).padStart(2, '0') + ':00';
             hourSelect.appendChild(opt);
         }
-
+ 
         const minSelect = document.getElementById('tob-min');
         for (let i = 0; i <= 55; i += 5) {
             const opt = document.createElement('option');
@@ -183,27 +361,42 @@
             opt.text = String(i).padStart(2, '0');
             minSelect.appendChild(opt);
         }
-
+ 
         function switchTab(tabId, el) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-link').forEach(l => l.classList.remove('active'));
             document.getElementById(tabId).classList.add('active');
             el.classList.add('active');
         }
-
+ 
+        // ── Main fetch ────────────────────────────────────────────────────────
         async function getInsights() {
             const output = document.getElementById('babaji-text');
-            document.getElementById('results-area').style.display = 'block';
-            output.innerText = "Dredging the silt...";
-
+            const resultsArea = document.getElementById('results-area');
+            const audioPlayer = document.getElementById('audio-player');
+ 
+            resultsArea.style.display = 'block';
+            output.className = 'loading-dots';
+            output.innerText = "Dredging the silt";
+ 
+            // Revoke previous Blob URL to free memory
+            if (currentAudioUrl) {
+                URL.revokeObjectURL(currentAudioUrl);
+                currentAudioUrl = null;
+                audioPlayer.src = '';
+            }
+ 
+            const effectiveLang = langOverride || browserLang;
+ 
             const payload = {
                 name: document.getElementById('name').value,
                 dob: `${document.getElementById('dob-year').value}-${document.getElementById('dob-month').value}-${document.getElementById('dob-day').value}`,
                 tob: `${document.getElementById('tob-hour').value}:${document.getElementById('tob-min').value}`,
                 loc: document.getElementById('location').value,
-                tradition: selectedTradition
+                tradition: selectedTradition,
+                lang: effectiveLang
             };
-
+ 
             try {
                 const res = await fetch('/api/babaji', {
                     method: 'POST',
@@ -211,27 +404,52 @@
                     body: JSON.stringify(payload)
                 });
                 const data = await res.json();
-                
+ 
+                // ── Render narrative ──────────────────────────────────────────
+                output.className = '';
                 output.innerText = data.reading;
-
+ 
+                // ── Audio: Blob URL approach (works on Android + WebView) ─────
                 if (data.audio) {
-                    const audioPlayer = document.getElementById('audio-player');
-                    audioPlayer.src = 'data:audio/mp3;base64,' + data.audio;
-                    audioPlayer.play();
+                    try {
+                        const byteChars = atob(data.audio);
+                        const byteNums = new Uint8Array(byteChars.length);
+                        for (let i = 0; i < byteChars.length; i++) {
+                            byteNums[i] = byteChars.charCodeAt(i);
+                        }
+                        const blob = new Blob([byteNums], { type: 'audio/mpeg' });
+                        currentAudioUrl = URL.createObjectURL(blob);
+                        audioPlayer.src = currentAudioUrl;
+                        audioPlayer.load();
+                        // Attempt autoplay — browsers may block without user gesture
+                        audioPlayer.play().catch(() => {
+                            // Autoplay blocked — player is still loaded and user can press play
+                            console.log("Autoplay blocked by browser — player ready for manual play.");
+                        });
+                    } catch (audioErr) {
+                        console.error("Audio decode error:", audioErr);
+                    }
                 }
-
+ 
+                // ── Planet table ──────────────────────────────────────────────
                 const body = document.getElementById('chart-body');
                 body.innerHTML = (data.planets || []).map(p =>
                     `<tr><td>${p.name}</td><td>${p.sign}</td><td>${parseFloat(p.normDegree).toFixed(2)}°</td><td>${p.house}</td></tr>`
                 ).join('');
-
-                document.getElementById('aspect-list').innerHTML = (data.aspects || []).map(a => 
-                    `<div style="font-size:0.85rem; margin-bottom:8px; opacity:0.7;">⌬ ${a.p1} ${a.type} ${a.p2}</div>`
-                ).join('');
+ 
+                // ── Aspects ───────────────────────────────────────────────────
+                document.getElementById('aspect-list').innerHTML = (data.aspects || []).length
+                    ? (data.aspects).map(a =>
+                        `<div style="font-size:0.85rem; margin-bottom:8px; opacity:0.7;">⌬ ${a.p1} ${a.type} ${a.p2}</div>`
+                    ).join('')
+                    : `<div style="font-size:0.85rem; opacity:0.4; padding:10px;">Aspect calculations are part of a future celestial update.</div>`;
+ 
             } catch (e) {
-                output.innerText = "The stars are obscured.";
+                output.className = '';
+                output.innerText = "The stars are obscured. (" + e.message + ")";
             }
         }
     </script>
 </body>
 </html>
+ 
