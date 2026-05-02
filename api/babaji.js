@@ -34,7 +34,7 @@ module.exports = async function handler(req, res) {
         ).toString('base64');
 
         // 5. FETCH CHART
-        const astroResponse = await fetch("https://json.astrologyapi.com/v1/planets", {
+        const astroResponse = await fetch("https://json.astrologyapi.com/v1/western_horoscope", {
             method: "POST",
             headers: {
                 "Authorization": `Basic ${authString}`,
