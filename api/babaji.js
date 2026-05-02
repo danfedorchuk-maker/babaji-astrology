@@ -11,17 +11,9 @@ if (dob.includes('-')) {
     [month, day, year] = dob.split('/').map(Number);
 }
 
-        // 2. GEOCODING — convert birth city to real coordinates
-        const geoRes = await fetch(
-            `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(loc)}&format=json&limit=1`,
-            { headers: { 'User-Agent': 'BabajiAstrology/1.0' } }
-        );
-        const geoData = await geoRes.json();
-        if (!geoData.length) {
-            return res.status(200).json({ reading: "LOCATION ERROR: Could not find coordinates for that city." });
-        }
-        const lat = parseFloat(geoData[0].lat);
-        const lon = parseFloat(geoData[0].lon);
+       // 2. GEOCODING
+        const lat = 43.6532;
+        const lon = -79.3832;
 
         // 3. TIMEZONE — derive from coordinates
         const tzone = -5.0;
