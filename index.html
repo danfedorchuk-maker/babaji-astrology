@@ -15,7 +15,9 @@
         }
         body { 
             background: var(--midnight); 
-            background-image: radial-gradient(circle at center, var(--deep-navy) 0%, var(--midnight) 100%);
+            background-image: 
+                radial-gradient(circle at center, var(--deep-navy) 0%, var(--midnight) 100%),
+                url('https://www.transparenttextures.com/patterns/stardust.png');
             color: var(--text-gold); 
             font-family: 'Inter', sans-serif; 
             text-align: center; 
@@ -40,10 +42,11 @@
             color: var(--gold); 
             opacity: 0.9;
         }
-        input { 
+        input, select { 
             padding: 14px; border: none; border-bottom: 1px solid rgba(212, 175, 55, 0.3);
             background: transparent; color: white; width: 100%; box-sizing: border-box; margin-bottom: 20px;
         }
+        select option { background: #0b1026; }
         button { 
             background: transparent; color: var(--gold); padding: 18px; border: 1px solid var(--gold); 
             cursor: pointer; font-family: 'Cinzel Decorative', serif; width: 100%; margin: 25px 0;
@@ -58,8 +61,11 @@
         table { width: 100%; border-collapse: collapse; margin-top: 10px; }
         th { text-align: left; padding: 10px 5px; border-bottom: 1px solid rgba(212, 175, 55, 0.2); }
         td { padding: 12px 5px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); color: #ddd; font-size: 0.9rem; }
+        .field-label { font-size: 0.7rem; letter-spacing: 2px; color: var(--dusty-rose); display: block; text-align: left; margin-bottom: 5px; font-style: normal; }
+        .row { display: flex; gap: 10px; margin-bottom: 20px; }
+        .row select { margin-bottom: 0; flex: 1; }
+        #audio-player { width: 100%; margin-top: 20px; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        #audio-player { width: 100%; margin-top: 20px; filter: sepia(1) hue-rotate(10deg); }
     </style>
 </head>
 <body>
@@ -68,11 +74,45 @@
         <span class="precision-tag">VINTAGE COSMOLOGY • GROUNDED INSIGHT</span>
         
         <input type="text" id="name" placeholder="Seeker's Name">
-        <input type="date" id="dob">
-        <input type="time" id="tob">
+
+        <span class="field-label">DATE OF BIRTH</span>
+        <div class="row">
+            <select id="dob-month">
+                <option value="">Month</option>
+                <option value="01">January</option>
+                <option value="02">February</option>
+                <option value="03">March</option>
+                <option value="04">April</option>
+                <option value="05">May</option>
+                <option value="06">June</option>
+                <option value="07">July</option>
+                <option value="08">August</option>
+                <option value="09">September</option>
+                <option value="10">October</option>
+                <option value="11">November</option>
+                <option value="12">December</option>
+            </select>
+            <select id="dob-day">
+                <option value="">Day</option>
+            </select>
+            <select id="dob-year">
+                <option value="">Year</option>
+            </select>
+        </div>
+
+        <span class="field-label">TIME OF ARRIVAL</span>
+        <div class="row">
+            <select id="tob-hour">
+                <option value="">Hour</option>
+            </select>
+            <select id="tob-min">
+                <option value="">Min</option>
+            </select>
+        </div>
+
         <input type="text" id="location" placeholder="City of Birth">
         
-        <button onclick="getInsights()">Seek Cosmic Creaminess</button>
+        <button onclick="getInsights()">SEEK COSMIC CREAMINESS</button>
 
         <div class="divider"></div>
 
@@ -97,6 +137,42 @@
     </div>
 
     <script>
+        // Populate day dropdown
+        const daySelect = document.getElementById('dob-day');
+        for (let i = 1; i <= 31; i++) {
+            const opt = document.createElement('option');
+            opt.value = String(i).padStart(2, '0');
+            opt.text = i;
+            daySelect.appendChild(opt);
+        }
+
+        // Populate year dropdown
+        const yearSelect = document.getElementById('dob-year');
+        for (let i = 2010; i >= 1900; i--) {
+            const opt = document.createElement('option');
+            opt.value = i;
+            opt.text = i;
+            yearSelect.appendChild(opt);
+        }
+
+        // Populate hour dropdown
+        const hourSelect = document.getElementById('tob-hour');
+        for (let i = 0; i <= 23; i++) {
+            const opt = document.createElement('option');
+            opt.value = String(i).padStart(2, '0');
+            opt.text = String(i).padStart(2, '0') + ':00';
+            hourSelect.appendChild(opt);
+        }
+
+        // Populate minute dropdown
+        const minSelect = document.getElementById('tob-min');
+        for (let i = 0; i <= 55; i += 5) {
+            const opt = document.createElement('option');
+            opt.value = String(i).padStart(2, '0');
+            opt.text = String(i).padStart(2, '0');
+            minSelect.appendChild(opt);
+        }
+
         function switchTab(tabId, el) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-link').forEach(l => l.classList.remove('active'));
@@ -111,8 +187,8 @@
 
             const payload = {
                 name: document.getElementById('name').value,
-                dob: document.getElementById('dob').value,
-                tob: document.getElementById('tob').value,
+                dob: `${document.getElementById('dob-year').value}-${document.getElementById('dob-month').value}-${document.getElementById('dob-day').value}`,
+                tob: `${document.getElementById('tob-hour').value}:${document.getElementById('tob-min').value}`,
                 loc: document.getElementById('location').value
             };
 
