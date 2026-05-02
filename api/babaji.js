@@ -25,10 +25,10 @@ if (dob.includes('-')) {
 
         // 3. TIMEZONE — derive from coordinates
         const tzRes = await fetch(
-            `https://timezonefinder.michelfe.it/api/0?lng=${lon}&lat=${lat}`
+            `https://timeapi.io/api/timezone/coordinate?latitude=${lat}&longitude=${lon}`
         );
         const tzData = await tzRes.json();
-        const tzone = tzData.offset_dst ?? tzData.offset ?? 0;
+        const tzone = tzData.currentUtcOffset?.seconds ? tzData.currentUtcOffset.seconds / 3600 : 0;
 
         // 4. ASTROLOGYAPI AUTH
         const authString = Buffer.from(
