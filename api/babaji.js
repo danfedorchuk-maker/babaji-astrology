@@ -86,10 +86,35 @@ module.exports = async function handler(req, res) {
             })
         });
         const aiData = await groqResponse.json();
+        const reading = aiData.choices[0].message.content;
 
-        // 8. RESPOND
+        // 8. GOOGLE TTS
+        const ttsResponse = await fetch(
+            `https://texttospeech.googleapis.com/v1/text:synthesize?key=${process.env.GOOGLE_TTS_KEY}`,
+            {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    input: { text: reading },
+                    voice: {
+                        languageCode: "en-IN",
+                        name: "en-IN-Wavenet-C",
+                        ssmlGender: "MALE"
+                    },
+                    audioConfig: {
+                        audioEncoding: "MP3",
+                        speakingRate: 0.75,
+                        pitch: -4.0
+                    }
+                })
+            }
+        );
+        const ttsData = await ttsResponse.json();
+
+        // 9. RESPOND
         res.status(200).json({
-            reading: aiData.choices[0].message.content,
+            reading: reading,
+            audio: ttsData.audioContent || null,
             planets: planets,
             aspects: []
         });
