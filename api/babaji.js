@@ -28,10 +28,21 @@ module.exports = async function handler(req, res) {
         const tzData = await tzRes.json();
         const tzone = tzData.currentUtcOffset?.seconds ? tzData.currentUtcOffset.seconds / 3600 : 0;
 
-        // 4. ASTROLOGYAPI AUTH
-        const authString = Buffer.from(
-            `${process.env.ASTRO_USER_ID}:${process.env.ASTRO_API_KEY}`
-        ).toString('base64');
+        // 4. ASTROLOGYAPI AUTH + FETCH CHART
+        const astroResponse = await fetch("https://json.astrologyapi.com/v1/planets/tropical", {
+            method: "POST",
+            headers: {
+                "x-astrologyapi-key": process.env.ASTRO_ACCESS_TOKEN,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                day, month, year,
+                hour: parseInt(tob.split(':')[0]),
+                min: parseInt(tob.split(':')[1]),
+                lat, lon, tzone,
+                house_type: "placidus"
+            })
+        });
 
         // 5. FETCH CHART
         const astroResponse = await fetch("https://json.astrologyapi.com/v1/western_horoscope", {
