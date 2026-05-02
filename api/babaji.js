@@ -1,4 +1,3 @@
-
 module.exports = async function handler(req, res) {
     console.log("--- BABAJI UNIVERSAL START ---");
     try {
@@ -13,11 +12,21 @@ module.exports = async function handler(req, res) {
         }
 
         // 2. GEOCODING
-        const lat = 43.6532;
-        const lon = -79.3832;
+        const geoRes = await fetch(
+            `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(loc)}&format=json&limit=1`,
+            { headers: { 'User-Agent': 'BabajiAstrology/1.0' } }
+        );
+        const geoData = await geoRes.json();
+        if (!geoData.length) {
+            return res.status(200).json({ reading: "LOCATION ERROR: Could not find that city.", planets: [], aspects: [] });
+        }
+        const lat = parseFloat(geoData[0].lat);
+        const lon = parseFloat(geoData[0].lon);
 
         // 3. TIMEZONE
-        const tzone = -5.0;
+        const tzRes = await fetch(`https://timeapi.io/api/timezone/coordinate?latitude=${lat}&longitude=${lon}`);
+        const tzData = await tzRes.json();
+        const tzone = tzData.currentUtcOffset?.seconds ? tzData.currentUtcOffset.seconds / 3600 : 0;
 
         // 4. ASTROLOGYAPI AUTH
         const authString = Buffer.from(
@@ -51,7 +60,7 @@ module.exports = async function handler(req, res) {
 
         // 6. BUILD CHART SUMMARY
         const planetSummary = planets
-            .map(p => `${p.name} in ${p.sign} (${p.normDegree}°) — House ${p.house}`)
+            .map(p => `${p.name} in ${p.sign} (${parseFloat(p.normDegree).toFixed(2)}°) — House ${p.house}`)
             .join('\n');
 
         // 7. GROQ NARRATIVE
@@ -67,7 +76,7 @@ module.exports = async function handler(req, res) {
                 messages: [
                     {
                         role: "system",
-                        content: `You are Babaji — an ancient, grounded cosmic interpreter. Speak in rich, unhurried prose. No bullet points. No fluff. Interpret the seeker's chart as if reading from a worn celestial ledger. Reference specific placements. Be precise, poetic, and occasionally wry.`
+                        content: `You are Babaji — an ancient, grounded cosmic interpreter. Speak in rich, unhurried prose. No bullet points. No fluff. Interpret the seeker's chart as if reading from a worn celestial ledger. Reference specific placements. Be precise, poetic, and occasionally wry. When referencing degrees always round to two decimal places.`
                     },
                     {
                         role: "user",
