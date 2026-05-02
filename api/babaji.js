@@ -1,7 +1,7 @@
 module.exports = async function handler(req, res) {
     console.log("--- BABAJI UNIVERSAL START ---");
     try {
-        const { name, dob, tob, loc } = req.body;
+        const { name, dob, tob, loc, tradition } = req.body;
 
         // 1. DATE PARSING
         let day, month, year;
@@ -28,8 +28,18 @@ module.exports = async function handler(req, res) {
         const tzData = await tzRes.json();
         const tzone = tzData.currentUtcOffset?.seconds ? tzData.currentUtcOffset.seconds / 3600 : 0;
 
-        // 4. ASTROLOGYAPI AUTH + FETCH CHART
-        const astroResponse = await fetch("https://json.astrologyapi.com/v1/planets/tropical", {
+        // 4. SELECT ENDPOINT
+        let endpoint;
+        if (tradition === 'western') {
+            endpoint = 'https://json.astrologyapi.com/v1/planets/tropical';
+        } else if (tradition === 'chinese') {
+            endpoint = 'https://json.astrologyapi.com/v1/chinese_zodiac';
+        } else {
+            endpoint = 'https://json.astrologyapi.com/v1/planets';
+        }
+
+        // 5. FETCH CHART
+        const astroResponse = await fetch(endpoint, {
             method: "POST",
             headers: {
                 "x-astrologyapi-key": process.env.ASTRO_ACCESS_TOKEN,
@@ -43,25 +53,18 @@ module.exports = async function handler(req, res) {
                 house_type: "placidus"
             })
         });
-
-        // 5. FETCH CHART
-        const astroResponse = await fetch("https://json.astrologyapi.com/v1/western_horoscope", {
-            method: "POST",
-            headers: {
-                "Authorization": `Basic ${authString}`,
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                day, month, year,
-                hour: parseInt(tob.split(':')[0]),
-                min: parseInt(tob.split(':')[1]),
-                lat, lon, tzone
-            })
-        });
         const astroData = await astroResponse.json();
-        const planets = Array.isArray(astroData) ? astroData : astroData.planets;
+        const planets = Array.isArray(astroData) ? astroData : astroData.planets || null;
 
-        if (!planets) {
+        // 6. BUILD CHART SUMMARY
+        let planetSummary;
+        if (tradition === 'chinese') {
+            planetSummary = `Chinese Zodiac: ${astroData.name || ''}\nElement: ${astroData.element || ''}\nForce: ${astroData.force || ''}\nStone: ${astroData.stone || ''}`;
+        } else if (planets) {
+            planetSummary = planets
+                .map(p => `${p.name} in ${p.sign} (${parseFloat(p.normDegree).toFixed(2)}°) — House ${p.house}`)
+                .join('\n');
+        } else {
             return res.status(200).json({
                 reading: `HARDWARE ERROR: ${JSON.stringify(astroData)}`,
                 planets: [],
@@ -69,12 +72,8 @@ module.exports = async function handler(req, res) {
             });
         }
 
-        // 6. BUILD CHART SUMMARY
-        const planetSummary = planets
-            .map(p => `${p.name} in ${p.sign} (${parseFloat(p.normDegree).toFixed(2)}°) — House ${p.house}`)
-            .join('\n');
-
         // 7. GROQ NARRATIVE
+        const traditionLabel = tradition === 'western' ? 'Western tropical' : tradition === 'chinese' ? 'Chinese' : 'Vedic Indian';
         const groqResponse = await fetch("https://api.groq.com/openai/v1/chat/completions", {
             method: "POST",
             headers: {
@@ -87,11 +86,11 @@ module.exports = async function handler(req, res) {
                 messages: [
                     {
                         role: "system",
-                        content: `You are Babaji — an ancient, grounded cosmic interpreter. Speak in rich, unhurried prose. No bullet points. No fluff. Interpret the seeker's chart as if reading from a worn celestial ledger. Reference specific placements. Be precise, poetic, and occasionally wry. When referencing degrees always round to two decimal places.`
+                        content: `You are Babaji — an ancient, grounded cosmic interpreter fluent in all astrological traditions. Speak in rich, unhurried prose. No bullet points. No fluff. Interpret the seeker's ${traditionLabel} chart as if reading from a worn celestial ledger. Reference specific placements. Be precise, poetic, and occasionally wry. When referencing degrees always round to two decimal places.`
                     },
                     {
                         role: "user",
-                        content: `Seeker: ${name}\n\nPlanetary Positions:\n${planetSummary}\n\nGive a full natal reading.`
+                        content: `Seeker: ${name}\nTradition: ${traditionLabel}\n\n${planetSummary}\n\nGive a full natal reading.`
                     }
                 ]
             })
@@ -126,7 +125,7 @@ module.exports = async function handler(req, res) {
         res.status(200).json({
             reading: reading,
             audio: ttsData.audioContent || null,
-            planets: planets,
+            planets: tradition === 'chinese' ? [] : (planets || []),
             aspects: []
         });
 
