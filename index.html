@@ -1,6 +1,3 @@
-Babaji index · HTML
-Copy
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,36 +6,58 @@ Copy
     <title>Babaji Astrology | Premium</title>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Playfair+Display:ital,wght@0,400;1,400&family=Inter:wght@300&display=swap" rel="stylesheet">
     <style>
+        /* ── SECTION 1: CSS VARIABLES ── */
         :root { --midnight:#05070a; --gold:#d4af37; --rose:#a67c7c; --navy:#0b1026; --tgold:#e2c275; }
         *{box-sizing:border-box;}
+
+        /* ── SECTION 2: BASE LAYOUT ── */
         body{background:var(--midnight);background-image:radial-gradient(circle at center,var(--navy) 0%,var(--midnight) 100%);color:var(--tgold);font-family:'Inter',sans-serif;text-align:center;padding:40px 20px;margin:0;}
         .box{border:1px solid rgba(212,175,55,.2);padding:40px;background:rgba(11,16,38,.7);backdrop-filter:blur(12px);max-width:600px;margin:auto;box-shadow:0 10px 50px rgba(0,0,0,.9);}
+
+        /* ── SECTION 3: TYPOGRAPHY ── */
         h1{font-family:'Cinzel Decorative',serif;letter-spacing:8px;color:var(--gold);text-transform:uppercase;margin-bottom:5px;font-size:clamp(1.1rem,4vw,1.8rem);}
         .tag{font-size:.65rem;letter-spacing:3px;color:var(--rose);margin-bottom:30px;display:block;}
         .lbl{font-size:.7rem;letter-spacing:2px;color:var(--rose);display:block;text-align:left;margin-bottom:8px;}
+
+        /* ── SECTION 4: FORM INPUTS ── */
         input,select{padding:14px;border:none;border-bottom:1px solid rgba(212,175,55,.3);background:transparent;color:white;width:100%;margin-bottom:20px;font-family:'Inter',sans-serif;font-size:.9rem;-webkit-appearance:none;appearance:none;}
         select option{background:#0b1026;}
         input::placeholder{color:rgba(255,255,255,.3);}
         .row{display:flex;gap:10px;margin-bottom:20px;}
         .row select{margin-bottom:0;flex:1;}
+
+        /* ── SECTION 5: BUTTONS ── */
         button{background:transparent;color:var(--gold);padding:18px;border:1px solid var(--gold);cursor:pointer;font-family:'Cinzel Decorative',serif;width:100%;margin:25px 0;font-size:.7rem;letter-spacing:2px;transition:background .3s;}
         button:hover{background:rgba(212,175,55,.08);}
+
+        /* ── SECTION 6: SEGMENT BUTTON GROUPS (tradition + language) ── */
         .seg{display:flex;gap:8px;margin-bottom:20px;}
         .seg button{flex:1;margin:0;padding:11px 4px;font-size:.55rem;color:rgba(226,194,117,.4);border-color:rgba(212,175,55,.2);}
         .seg button.active{color:var(--gold);border-color:var(--gold);background:rgba(212,175,55,.05);}
+
+        /* ── SECTION 7: RESULTS AREA ── */
         .divider{border-top:1px solid rgba(212,175,55,.1);margin:30px 0;}
         .tabs{display:flex;justify-content:center;gap:20px;margin-bottom:25px;}
         .tab{font-size:.75rem;cursor:pointer;color:rgba(226,194,117,.4);text-transform:uppercase;letter-spacing:2px;padding-bottom:5px;}
         .tab.active{color:var(--gold);border-bottom:1px solid var(--gold);}
         .pane{display:none;text-align:left;animation:fadeIn 1s;}
         .pane.active{display:block;}
+
+        /* ── SECTION 8: NARRATIVE TEXT ── */
         #babaji-text{font-family:'Playfair Display',serif;font-style:italic;font-size:1.1rem;line-height:1.9;color:#eee;padding:10px;}
+
+        /* ── SECTION 9: HARDWARE TABLE ── */
         table{width:100%;border-collapse:collapse;margin-top:10px;}
         th{font-family:'Playfair Display',serif;font-style:italic;font-size:.85rem;color:var(--gold);text-align:left;padding:10px 5px;border-bottom:1px solid rgba(212,175,55,.2);}
         td{padding:12px 5px;border-bottom:1px solid rgba(255,255,255,.05);color:#ddd;font-size:.9rem;}
+
+        /* ── SECTION 10: AUDIO PLAYER ── */
         .audio-box{margin-top:20px;padding:16px;border:1px solid rgba(212,175,55,.15);background:rgba(11,16,38,.5);}
         #audio-player{width:100%;margin-top:8px;}
+
+        /* ── SECTION 11: LANGUAGE PILL ── */
         .lang-pill{font-size:.6rem;letter-spacing:2px;color:rgba(166,124,124,.6);text-align:left;display:block;margin-bottom:16px;}
+
         @keyframes fadeIn{from{opacity:0}to{opacity:1}}
     </style>
 </head>
@@ -46,44 +65,53 @@ Copy
 <div class="box">
     <h1>ASK BABAJI</h1>
     <span class="tag">VINTAGE COSMOLOGY • GROUNDED INSIGHT</span>
- 
+
+    <!-- ── SECTION 12: TRADITION SELECTOR ── -->
     <span class="lbl">CHOOSE YOUR TRADITION</span>
     <div class="seg" id="trad-seg">
         <button class="active" onclick="pick(this,'trad','western')">WESTERN</button>
         <button onclick="pick(this,'trad','indian')">INDIAN</button>
         <button onclick="pick(this,'trad','chinese')">CHINESE</button>
     </div>
- 
+
+    <!-- ── SECTION 13: LANGUAGE OVERRIDE ──
+         AUTO = use browser language
+         EN = force English (useful for English speakers on non-English phones)
+         RU/HI/ZH-TW = force those languages regardless of phone setting -->
     <span class="lbl">LANGUAGE OVERRIDE</span>
     <div class="seg" id="lang-seg">
-        <button onclick="pick(this,'lang','ru')">РУССКИЙ</button>
-        <button onclick="pick(this,'lang','hi')">हिन्दी</button>
-        <button onclick="pick(this,'lang','zh-TW')">繁體中文</button>
+        <button onclick="pick(this,'lang','en')">EN</button>
+        <button onclick="pick(this,'lang','ru')">РУС</button>
+        <button onclick="pick(this,'lang','hi')">हिं</button>
+        <button onclick="pick(this,'lang','zh-TW')">中文</button>
         <button onclick="pick(this,'lang',null)">AUTO</button>
     </div>
- 
+
+    <!-- ── SECTION 14: LANGUAGE INDICATOR ── shows what language will be used -->
     <span class="lang-pill" id="lang-pill"></span>
- 
+
+    <!-- ── SECTION 15: SEEKER INPUT FIELDS ── -->
     <input type="text" id="name" placeholder="Seeker's Name">
- 
+
     <span class="lbl">DATE OF BIRTH</span>
     <div class="row">
         <select id="mon"></select>
         <select id="day"></select>
         <select id="yr"></select>
     </div>
- 
+
     <span class="lbl">TIME OF ARRIVAL</span>
     <div class="row">
         <select id="hr"></select>
         <select id="mn"></select>
     </div>
- 
+
     <input type="text" id="loc" placeholder="City of Birth">
- 
+
     <button onclick="getInsights()">SEEK COSMIC CREAMINESS</button>
     <div class="divider"></div>
- 
+
+    <!-- ── SECTION 16: RESULTS AREA — hidden until reading completes ── -->
     <div id="results" style="display:none">
         <div class="audio-box">
             <span class="lbl">BABAJI SPEAKS</span>
@@ -101,57 +129,66 @@ Copy
         <div id="asp" class="pane"><div id="aspect-list"></div></div>
     </div>
 </div>
- 
+
 <script>
+    // ── SECTION 17: STATE ─────────────────────────────────────
+    // trad = selected tradition, lang = null means auto-detect
     const state = { trad: 'western', lang: null };
     const browserLang = navigator.language || 'en';
     let blobUrl = null;
- 
+
     updatePill();
- 
+
+    // ── SECTION 18: SEGMENT BUTTON PICKER ────────────────────
+    // Handles both tradition and language button groups
     function pick(el, key, val) {
         document.querySelectorAll(`#${key === 'trad' ? 'trad' : 'lang'}-seg button`).forEach(b => b.classList.remove('active'));
         state[key] = val;
         if (val !== null) el.classList.add('active');
         updatePill();
     }
- 
+
+    // ── SECTION 19: LANGUAGE PILL DISPLAY ────────────────────
+    // Shows the user what language is currently active
     function updatePill() {
         document.getElementById('lang-pill').textContent = 'LANGUAGE: ' + (state.lang || browserLang).toUpperCase();
     }
- 
+
+    // ── SECTION 20: TAB SWITCHER ─────────────────────────────
     function switchTab(id, el) {
         document.querySelectorAll('.pane').forEach(p => p.classList.remove('active'));
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
         document.getElementById(id).classList.add('active');
         el.classList.add('active');
     }
- 
-    // Populate selects
+
+    // ── SECTION 21: POPULATE SELECT DROPDOWNS ────────────────
     const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
     const mon = document.getElementById('mon');
     mon.innerHTML = '<option value="">Month</option>' + months.map((m,i)=>`<option value="${String(i+1).padStart(2,'0')}">${m}</option>`).join('');
- 
+
     const day = document.getElementById('day');
     day.innerHTML = '<option value="">Day</option>' + [...Array(31)].map((_,i)=>`<option value="${String(i+1).padStart(2,'0')}">${i+1}</option>`).join('');
- 
+
     const yr = document.getElementById('yr');
     yr.innerHTML = '<option value="">Year</option>' + [...Array(111)].map((_,i)=>`<option value="${2010-i}">${2010-i}</option>`).join('');
- 
+
     const hr = document.getElementById('hr');
     hr.innerHTML = '<option value="">Hour</option>' + [...Array(24)].map((_,i)=>`<option value="${String(i).padStart(2,'0')}">${String(i).padStart(2,'0')}:00</option>`).join('');
- 
+
     const mn = document.getElementById('mn');
     mn.innerHTML = '<option value="">Min</option>' + [...Array(12)].map((_,i)=>`<option value="${String(i*5).padStart(2,'0')}">${String(i*5).padStart(2,'0')}</option>`).join('');
- 
+
+    // ── SECTION 22: MAIN FETCH — sends data to api/babaji.js ─
     async function getInsights() {
         const out = document.getElementById('babaji-text');
         const player = document.getElementById('audio-player');
         document.getElementById('results').style.display = 'block';
         out.innerText = 'Dredging the silt…';
- 
+
+        // Clean up previous audio blob to free memory
         if (blobUrl) { URL.revokeObjectURL(blobUrl); blobUrl = null; player.src = ''; }
- 
+
         try {
             const res = await fetch('/api/babaji', {
                 method: 'POST',
@@ -167,7 +204,8 @@ Copy
             });
             const data = await res.json();
             out.innerText = data.reading;
- 
+
+            // ── SECTION 23: AUDIO — Blob URL method works on Android ──
             if (data.audio) {
                 const bytes = atob(data.audio);
                 const buf = new Uint8Array(bytes.length);
@@ -177,15 +215,17 @@ Copy
                 player.load();
                 player.play().catch(() => {});
             }
- 
+
+            // ── SECTION 24: HARDWARE TABLE ───────────────────────────
             document.getElementById('planet-body').innerHTML = (data.planets || []).map(p =>
                 `<tr><td>${p.name}</td><td>${p.sign}</td><td>${parseFloat(p.normDegree).toFixed(2)}°</td><td>${p.house}</td></tr>`
             ).join('');
- 
+
+            // ── SECTION 25: ASPECTS ───────────────────────────────────
             document.getElementById('aspect-list').innerHTML = (data.aspects?.length)
                 ? data.aspects.map(a => `<div style="font-size:.85rem;margin-bottom:8px;opacity:.7">⌬ ${a.p1} ${a.type} ${a.p2}</div>`).join('')
                 : '<div style="font-size:.85rem;opacity:.4;padding:10px">Aspect calculations arriving in a future celestial update.</div>';
- 
+
         } catch(e) {
             out.innerText = 'The stars are obscured. (' + e.message + ')';
         }
@@ -193,4 +233,3 @@ Copy
 </script>
 </body>
 </html>
- 
