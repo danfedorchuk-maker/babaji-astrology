@@ -1,6 +1,6 @@
 module.exports = async function handler(req, res) {
     try {
-        const { name, dob, tob, loc, tradition, lang } = req.body;
+        const { name, dob, tob, loc, tradition, lang, houseSystem, angles } = req.body;
 
         const langCode = (lang || 'en').toLowerCase();
         const baseLang = langCode.split('-')[0];
@@ -24,6 +24,9 @@ module.exports = async function handler(req, res) {
             ? tzData.currentUtcOffset.seconds / 3600
             : (tzData.utcOffset ?? 0);
 
+        // ── HOUSE SYSTEM: use what the frontend selected, default to placidus ──
+        const houseType = (houseSystem === 'topocentric') ? 'topocentric' : 'placidus';
+
         const endpoints = {
             western: 'https://json.astrologyapi.com/v1/planets/tropical',
             chinese: 'https://json.astrologyapi.com/v1/chinese_zodiac',
@@ -31,7 +34,7 @@ module.exports = async function handler(req, res) {
         };
         const astroBody = tradition === 'chinese'
             ? { day, month, year }
-            : { day, month, year, hour: parseInt(tob.split(':')[0]), min: parseInt(tob.split(':')[1]), lat, lon, tzone, house_type: "placidus" };
+            : { day, month, year, hour: parseInt(tob.split(':')[0]), min: parseInt(tob.split(':')[1]), lat, lon, tzone, house_type: houseType };
 
         const astroRes = await fetch(endpoints[tradition] || endpoints.western, {
             method: "POST",
@@ -41,11 +44,18 @@ module.exports = async function handler(req, res) {
         const astroData = await astroRes.json();
         const planets = Array.isArray(astroData) ? astroData : astroData.planets || null;
 
+        // ── BUILD PLANET + ANGLES SUMMARY FOR AI ──────────────────────────────
         let planetSummary;
         if (tradition === 'chinese') {
             planetSummary = `Chinese Zodiac: ${astroData.name||''}, Element: ${astroData.element||''}, Force: ${astroData.force||''}, Stone: ${astroData.stone||''}`;
         } else if (planets) {
             planetSummary = planets.map(p => `${p.name} in ${p.sign} (${parseFloat(p.normDegree).toFixed(2)}°) — House ${p.house}`).join('\n');
+
+            // Append the four angles so Babaji can reference them in the reading
+            if (angles && angles.length) {
+                planetSummary += '\n\nChart Angles (' + houseType.toUpperCase() + ' houses):\n';
+                planetSummary += angles.map(a => `${a.name} (${a.label}): ${a.sign} ${a.degree}°`).join('\n');
+            }
         } else {
             return res.status(200).json({ reading: `HARDWARE ERROR: ${JSON.stringify(astroData)}`, planets: [], aspects: [] });
         }
@@ -60,9 +70,9 @@ module.exports = async function handler(req, res) {
                 messages: [
                     {
                         role: "system",
-                        content: `You are Babaji — ancient, grounded cosmic interpreter. Rich unhurried prose, no bullet points. Interpret the ${traditionLabel} chart from a worn celestial ledger. Precise, poetic, occasionally wry. Round degrees to two decimal places. Respond in the language identified by BCP-47 code: ${langCode}.`
+                        content: `You are Babaji — ancient, grounded cosmic interpreter. Rich unhurried prose, no bullet points. Interpret the ${traditionLabel} chart from a worn celestial ledger. Precise, poetic, occasionally wry. Round degrees to two decimal places. The house system used is ${houseType.toUpperCase()}. Always mention the Ascendant (ASC), Midheaven (MC), IC, and Descendant (DSC) angles by name and sign in your reading. Respond in the language identified by BCP-47 code: ${langCode}.`
                     },
-                    { role: "user", content: `Seeker: ${name}\nTradition: ${traditionLabel}\n\n${planetSummary}\n\nGive a full natal reading.` }
+                    { role: "user", content: `Seeker: ${name}\nTradition: ${traditionLabel}\nHouse System: ${houseType.toUpperCase()}\n\n${planetSummary}\n\nGive a full natal reading.` }
                 ]
             })
         });
