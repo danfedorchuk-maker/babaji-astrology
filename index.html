@@ -39,6 +39,20 @@
         #audio-player{width:100%;margin-top:8px;}
         .lang-pill{font-size:.6rem;letter-spacing:2px;color:rgba(166,124,124,.6);text-align:left;display:block;margin-bottom:16px;}
         @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+
+        /* PAYWALL STYLES */
+        #paywall{display:none;text-align:center;padding:20px 0;}
+        #paywall h2{font-family:'Cinzel Decorative',serif;color:var(--gold);letter-spacing:4px;font-size:1rem;margin-bottom:10px;}
+        #paywall p{font-size:.8rem;color:rgba(226,194,117,.6);margin-bottom:30px;line-height:1.8;}
+        .pay-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;}
+        .pay-card{border:1px solid rgba(212,175,55,.2);padding:20px 12px;cursor:pointer;transition:all .3s;position:relative;}
+        .pay-card:hover{border-color:var(--gold);background:rgba(212,175,55,.05);}
+        .pay-card.featured{border-color:var(--gold);}
+        .pay-card .badge{position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:var(--gold);color:#000;font-size:.5rem;letter-spacing:2px;padding:3px 8px;font-family:'Cinzel Decorative',serif;}
+        .pay-card .price{font-family:'Cinzel Decorative',serif;color:var(--gold);font-size:1.2rem;margin-bottom:4px;}
+        .pay-card .desc{font-size:.6rem;letter-spacing:1px;color:rgba(226,194,117,.5);}
+        .pay-card .sub-desc{font-size:.55rem;color:rgba(166,124,124,.6);margin-top:6px;}
+        .founding-note{font-size:.6rem;color:rgba(166,124,124,.5);margin-top:20px;letter-spacing:1px;}
     </style>
 </head>
 <body>
@@ -46,49 +60,86 @@
     <h1>ASK BABAJI</h1>
     <span class="tag">VINTAGE COSMOLOGY • GROUNDED INSIGHT</span>
 
-    <span class="lbl">CHOOSE YOUR TRADITION</span>
-    <div class="seg" id="trad-seg">
-        <button class="active" onclick="pick(this,'trad','western')">WESTERN</button>
-        <button onclick="pick(this,'trad','indian')">INDIAN</button>
-        <button onclick="pick(this,'trad','chinese')">CHINESE</button>
-    </div>
-
-    <div id="house-sys-wrap">
-        <span class="lbl">HOUSE SYSTEM</span>
-        <div class="seg" id="house-seg">
-            <button class="active" onclick="pick(this,'house','placidus')">PLACIDUS</button>
-            <button onclick="pick(this,'house','topocentric')">TOPOCENTRIC</button>
+    <!-- MAIN FORM -->
+    <div id="main-form">
+        <span class="lbl">CHOOSE YOUR TRADITION</span>
+        <div class="seg" id="trad-seg">
+            <button class="active" onclick="pick(this,'trad','western')">WESTERN</button>
+            <button onclick="pick(this,'trad','indian')">INDIAN</button>
+            <button onclick="pick(this,'trad','chinese')">CHINESE</button>
         </div>
+
+        <div id="house-sys-wrap">
+            <span class="lbl">HOUSE SYSTEM</span>
+            <div class="seg" id="house-seg">
+                <button class="active" onclick="pick(this,'house','placidus')">PLACIDUS</button>
+                <button onclick="pick(this,'house','topocentric')">TOPOCENTRIC</button>
+            </div>
+        </div>
+
+        <span class="lbl">LANGUAGE OVERRIDE</span>
+        <div class="seg" id="lang-seg">
+            <button onclick="pick(this,'lang','en')">EN</button>
+            <button onclick="pick(this,'lang','ru')">РУС</button>
+            <button onclick="pick(this,'lang','hi')">हिं</button>
+            <button onclick="pick(this,'lang','zh-TW')">中文</button>
+            <button onclick="pick(this,'lang',null)">AUTO</button>
+        </div>
+        <span class="lang-pill" id="lang-pill"></span>
+
+        <input type="text" id="name" placeholder="Seeker's Name">
+
+        <span class="lbl">DATE OF BIRTH</span>
+        <div class="row">
+            <select id="mon"></select>
+            <select id="day"></select>
+            <select id="yr"></select>
+        </div>
+
+        <span class="lbl">TIME OF ARRIVAL</span>
+        <div class="row">
+            <select id="hr"></select>
+            <select id="mn"></select>
+        </div>
+
+        <input type="text" id="loc" placeholder="City of Birth">
+
+        <button onclick="getInsights()">SEEK COSMIC CREAMINESS</button>
     </div>
 
-    <span class="lbl">LANGUAGE OVERRIDE</span>
-    <div class="seg" id="lang-seg">
-        <button onclick="pick(this,'lang','en')">EN</button>
-        <button onclick="pick(this,'lang','ru')">РУС</button>
-        <button onclick="pick(this,'lang','hi')">हिं</button>
-        <button onclick="pick(this,'lang','zh-TW')">中文</button>
-        <button onclick="pick(this,'lang',null)">AUTO</button>
+    <!-- PAYWALL -->
+    <div id="paywall">
+        <h2>THE COSMOS AWAITS</h2>
+        <p>Your free reading has been received.<br>To continue your celestial journey, choose your path below.</p>
+
+        <div class="pay-grid">
+            <div class="pay-card featured" onclick="checkout('price_1TTY8RELsv6hW8wtJIU52NmH')">
+                <div class="badge">FOUNDING MEMBER</div>
+                <div class="price">$15</div>
+                <div class="desc">PER MONTH</div>
+                <div class="sub-desc">Unlimited readings • Voice • All traditions</div>
+            </div>
+            <div class="pay-card" onclick="checkout('price_1TTYEIELsv6hW8wt6MO7Bo5X')">
+                <div class="price">$30</div>
+                <div class="desc">PER MONTH</div>
+                <div class="sub-desc">Unlimited readings • Voice • All traditions</div>
+            </div>
+            <div class="pay-card" onclick="checkout('price_1TTYFsELsv6hW8wtwI2GqHbi')">
+                <div class="price">$3</div>
+                <div class="desc">ONE READING</div>
+                <div class="sub-desc">Single cosmic consultation</div>
+            </div>
+            <div class="pay-card" onclick="checkout('price_1TTYH0ELsv6hW8wtovLUa04H')">
+                <div class="price">$5</div>
+                <div class="desc">TWO READINGS</div>
+                <div class="sub-desc">Double the cosmic wisdom</div>
+            </div>
+        </div>
+
+        <div class="founding-note">⚡ FOUNDING MEMBER RATE LOCKED FOREVER • FIRST 2000 SEEKERS ONLY</div>
+        <div id="founding-counter" style="font-size:.55rem;color:rgba(166,124,124,.4);margin-top:8px;letter-spacing:1px;"></div>
     </div>
-    <span class="lang-pill" id="lang-pill"></span>
 
-    <input type="text" id="name" placeholder="Seeker's Name">
-
-    <span class="lbl">DATE OF BIRTH</span>
-    <div class="row">
-        <select id="mon"></select>
-        <select id="day"></select>
-        <select id="yr"></select>
-    </div>
-
-    <span class="lbl">TIME OF ARRIVAL</span>
-    <div class="row">
-        <select id="hr"></select>
-        <select id="mn"></select>
-    </div>
-
-    <input type="text" id="loc" placeholder="City of Birth">
-
-    <button onclick="getInsights()">SEEK COSMIC CREAMINESS</button>
     <div class="divider"></div>
 
     <div id="results" style="display:none">
@@ -125,7 +176,71 @@
     const browserLang = navigator.language || 'en';
     let blobUrl = null;
 
+    // Generate or retrieve visitor ID
+    function getVisitorId() {
+        let vid = localStorage.getItem('babaji_vid');
+        if (!vid) {
+            vid = 'v_' + Math.random().toString(36).substr(2,9) + '_' + Date.now();
+            localStorage.setItem('babaji_vid', vid);
+        }
+        return vid;
+    }
+
+    const visitorId = getVisitorId();
+
+    // Check URL params for return from Stripe
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('paid') === 'true') {
+        localStorage.setItem('babaji_paid', 'true');
+        window.history.replaceState({}, '', '/');
+    }
+
     updatePill();
+    checkFoundingCount();
+
+    async function checkAccess() {
+        try {
+            const res = await fetch('/api/verify', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ visitorId })
+            });
+            return await res.json();
+        } catch(e) {
+            return { status: 'free', remaining: 1 };
+        }
+    }
+
+    async function checkout(priceId) {
+        try {
+            const res = await fetch('/api/checkout', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ priceId, visitorId })
+            });
+            const data = await res.json();
+            if (data.url) window.location.href = data.url;
+        } catch(e) {
+            alert('Payment system unavailable. Please try again.');
+        }
+    }
+
+    async function checkFoundingCount() {
+        try {
+            const res = await fetch('/api/verify', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ visitorId: 'count_check' })
+            });
+            // Just a ping — founding counter shown statically for now
+            document.getElementById('founding-counter').textContent = 'FOUNDING SPOTS FILLING FAST';
+        } catch(e) {}
+    }
+
+    function showPaywall() {
+        document.getElementById('main-form').style.display = 'none';
+        document.getElementById('paywall').style.display = 'block';
+    }
 
     function pick(el, key, val) {
         const segId = key === 'trad' ? 'trad-seg' : key === 'house' ? 'house-seg' : 'lang-seg';
@@ -204,7 +319,6 @@
         const R = x => x*Math.PI/180, D = x => x*180/Math.PI;
         const e=R(eps), l=R(lat);
         const mc=calcMC(ramc,eps), asc=calcAscendant(ramc,eps,lat), ic=norm(mc+180), dsc=norm(asc+180);
-
         function placidusIntermediate(houseNum) {
             let offset, base;
             if (houseNum===11){offset=1/3;base=ramc;}
@@ -225,7 +339,6 @@
             const sinLon=(Math.cos(e)*Math.sin(ra_cusp)+Math.tan(dec)*Math.sin(e));
             return norm(D(Math.atan2(sinLon,Math.cos(ra_cusp))));
         }
-
         return {
             cusps:[asc,placidusIntermediate(2),placidusIntermediate(3),ic,
                 norm(ic+placidusIntermediate(3)-placidusIntermediate(2)),
@@ -240,7 +353,6 @@
         const R = x => x*Math.PI/180, D = x => x*180/Math.PI;
         const e=R(eps), l=R(lat);
         const mc=calcMC(ramc,eps), asc=calcAscendant(ramc,eps,lat), ic=norm(mc+180), dsc=norm(asc+180);
-
         function topoIntermediate(houseNum) {
             let f, base;
             if(houseNum===11){f=1/3;base=ramc;}
@@ -257,7 +369,6 @@
             const sinLon=(Math.cos(e)*Math.sin(ra_cusp)+Math.tan(dec)*Math.sin(e));
             return norm(D(Math.atan2(sinLon,Math.cos(ra_cusp))));
         }
-
         const h2=topoIntermediate(2),h3=topoIntermediate(3),h11=topoIntermediate(11),h12=topoIntermediate(12);
         return {
             cusps:[asc,h2,h3,ic,norm(ic+(h3-asc)),norm(ic+(h12-asc)*2),
@@ -276,6 +387,14 @@
     }
 
     async function getInsights() {
+        // Check access first
+        const access = await checkAccess();
+
+        if (access.status === 'limit') {
+            showPaywall();
+            return;
+        }
+
         const out = document.getElementById('babaji-text');
         const player = document.getElementById('audio-player');
         document.getElementById('results').style.display = 'block';
@@ -308,9 +427,7 @@
         const jd=julianDay(dobYear,dobMonth,dobDay,tobHour+tobMin/60-lon/15);
         const eps=obliquity(jd);
         const ramc=lst(jd,lon);
-
         const houses = state.house==='topocentric' ? topocentricHouses(ramc,eps,lat) : placidusHouses(ramc,eps,lat);
-
         const angles = [
             {name:'ASC',label:'Ascendant',lon:houses.asc},
             {name:'MC', label:'Midheaven',lon:houses.mc},
@@ -330,6 +447,7 @@
                     tradition: state.trad,
                     lang: state.lang||browserLang,
                     houseSystem: state.house,
+                    visitorId,
                     angles: angles.map(a=>({name:a.name,label:a.label,sign:a.sign,degree:parseFloat(a.normDegree).toFixed(2)}))
                 })
             });
@@ -378,4 +496,4 @@
     }
 </script>
 </body>
-</html>Want to be notified when Claude responds?NotifySonnet 4.6
+</html>
