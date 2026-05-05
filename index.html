@@ -279,7 +279,7 @@
     const hr = document.getElementById('hr');
     hr.innerHTML = '<option value="">Hour</option>' + [...Array(24)].map((_,i)=>`<option value="${String(i).padStart(2,'0')}">${String(i).padStart(2,'0')}:00</option>`).join('');
     const mn = document.getElementById('mn');
-    mn.innerHTML = '<option value="">Min</option>' + [...Array(12)].map((_,i)=>`<option value="${String(i*5).padStart(2,'0')}">${String(i*5).padStart(2,'0')}</option>`).join('');
+    mn.innerHTML = '<option value="">Min</option>' + [...Array(60)].map((_,i)=>`<option value="${String(i).padStart(2,'0')}">${String(i).padStart(2,'0')}</option>`).join('');
 
     const ZODIAC_SIGNS = ['Aries','Taurus','Gemini','Cancer','Leo','Virgo','Libra','Scorpio','Sagittarius','Capricorn','Aquarius','Pisces'];
     function norm(deg) { return ((deg % 360) + 360) % 360; }
