@@ -24,7 +24,6 @@ module.exports = async function handler(req, res) {
             ? tzData.currentUtcOffset.seconds / 3600
             : (tzData.utcOffset ?? 0);
 
-        // ── HOUSE SYSTEM: use what the frontend selected, default to placidus ──
         const houseType = (houseSystem === 'topocentric') ? 'topocentric' : 'placidus';
 
         const endpoints = {
@@ -44,14 +43,11 @@ module.exports = async function handler(req, res) {
         const astroData = await astroRes.json();
         const planets = Array.isArray(astroData) ? astroData : astroData.planets || null;
 
-        // ── BUILD PLANET + ANGLES SUMMARY FOR AI ──────────────────────────────
         let planetSummary;
         if (tradition === 'chinese') {
             planetSummary = `Chinese Zodiac: ${astroData.name||''}, Element: ${astroData.element||''}, Force: ${astroData.force||''}, Stone: ${astroData.stone||''}`;
         } else if (planets) {
             planetSummary = planets.map(p => `${p.name} in ${p.sign} (${parseFloat(p.normDegree).toFixed(2)}°) — House ${p.house}`).join('\n');
-
-            // Append the four angles so Babaji can reference them in the reading
             if (angles && angles.length) {
                 planetSummary += '\n\nChart Angles (' + houseType.toUpperCase() + ' houses):\n';
                 planetSummary += angles.map(a => `${a.name} (${a.label}): ${a.sign} ${a.degree}°`).join('\n');
@@ -127,6 +123,18 @@ module.exports = async function handler(req, res) {
         const voiceKey = baseLang === 'en' ? `en-${tradition}` : (voices[langCode] ? langCode : baseLang);
         const [languageCode, voiceName, ssmlGender] = voices[voiceKey] || voices['en-western'];
         const audio = await synthesizeChunked(reading, { languageCode, name: voiceName, ssmlGender }, process.env.GOOGLE_TTS_KEY);
+
+        // Record free reading used in Redis
+        const visitorId = req.body.visitorId;
+        if (visitorId) {
+            try {
+                const baseUrl = process.env.KV_REST_API_URL;
+                const token = process.env.KV_REST_API_TOKEN;
+                await fetch(`${baseUrl}/incr/free:${visitorId}`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+            } catch(e) {}
+        }
 
         res.status(200).json({
             reading,
