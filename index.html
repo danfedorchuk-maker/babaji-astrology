@@ -275,7 +275,7 @@
     const day = document.getElementById('day');
     day.innerHTML = '<option value="">Day</option>' + [...Array(31)].map((_,i)=>`<option value="${String(i+1).padStart(2,'0')}">${i+1}</option>`).join('');
     const yr = document.getElementById('yr');
-    yr.innerHTML = '<option value="">Year</option>' + [...Array(111)].map((_,i)=>`<option value="${2010-i}">${2010-i}</option>`).join('');
+    yr.innerHTML = '<option value="">Year</option>' + [...Array(160)].map((_,i)=>`<option value="${2025-i}">${2025-i}</option>`).join('');
     const hr = document.getElementById('hr');
     hr.innerHTML = '<option value="">Hour</option>' + [...Array(24)].map((_,i)=>`<option value="${String(i).padStart(2,'0')}">${String(i).padStart(2,'0')}:00</option>`).join('');
     const mn = document.getElementById('mn');
