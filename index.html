@@ -230,7 +230,16 @@
     }
 
     async function checkFoundingCount() {
-        document.getElementById('founding-counter').textContent = 'FOUNDING SPOTS FILLING FAST';
+        try {
+            const res = await fetch('/api/founding-count');
+            const data = await res.json();
+            const count = parseInt(data.count || '0');
+            const remaining = Math.max(0, 2000 - count);
+            document.getElementById('founding-counter').textContent =
+                `${remaining} FOUNDING SPOTS REMAINING OF 2,000`;
+        } catch(e) {
+            document.getElementById('founding-counter').textContent = 'FOUNDING SPOTS FILLING FAST';
+        }
     }
 
     function showPaywall() {
@@ -387,6 +396,15 @@
         if (access.status === 'limit') {
             showPaywall();
             return;
+        }
+
+        // Deduct a credit if paying per reading
+        if (access.status === 'credits') {
+            await fetch('/api/use-credit', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ visitorId })
+            });
         }
 
         const out = document.getElementById('babaji-text');
