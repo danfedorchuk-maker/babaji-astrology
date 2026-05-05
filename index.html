@@ -60,7 +60,6 @@
     <h1>ASK BABAJI</h1>
     <span class="tag">VINTAGE COSMOLOGY • GROUNDED INSIGHT</span>
 
-    <!-- MAIN FORM -->
     <div id="main-form">
         <span class="lbl">CHOOSE YOUR TRADITION</span>
         <div class="seg" id="trad-seg">
@@ -176,7 +175,6 @@
     const browserLang = navigator.language || 'en';
     let blobUrl = null;
 
-    // Generate or retrieve visitor ID
     function getVisitorId() {
         let vid = localStorage.getItem('babaji_vid');
         if (!vid) {
@@ -193,6 +191,12 @@
     if (urlParams.get('paid') === 'true') {
         localStorage.setItem('babaji_paid', 'true');
         window.history.replaceState({}, '', '/');
+    }
+
+    // Admin bypass
+    const adminParam = urlParams.get('admin');
+    if (adminParam === 'babaji2026') {
+        localStorage.setItem('babaji_vid', 'daniel_admin_founding');
     }
 
     updatePill();
@@ -226,15 +230,7 @@
     }
 
     async function checkFoundingCount() {
-        try {
-            const res = await fetch('/api/verify', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ visitorId: 'count_check' })
-            });
-            // Just a ping — founding counter shown statically for now
-            document.getElementById('founding-counter').textContent = 'FOUNDING SPOTS FILLING FAST';
-        } catch(e) {}
+        document.getElementById('founding-counter').textContent = 'FOUNDING SPOTS FILLING FAST';
     }
 
     function showPaywall() {
@@ -387,9 +383,7 @@
     }
 
     async function getInsights() {
-        // Check access first
         const access = await checkAccess();
-
         if (access.status === 'limit') {
             showPaywall();
             return;
