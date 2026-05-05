@@ -4,6 +4,9 @@ module.exports = async function handler(req, res) {
 
   const { visitorId } = req.body;
   if (!visitorId) return res.status(200).json({ status: 'free', remaining: 1 });
+  if (visitorId === 'daniel_admin_founding') {
+    return res.status(200).json({ status: 'paid', plan: 'founding' });
+}
 
   try {
     const baseUrl = process.env.KV_REST_API_URL;
