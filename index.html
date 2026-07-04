@@ -101,7 +101,11 @@
             <select id="mn"></select>
         </div>
 
-        <input type="text" id="loc" placeholder="City of Birth">
+        <div class="row">
+            <input type="text" id="loc" placeholder="City of Birth" style="flex:1.4;">
+            <input type="text" id="loc-country" placeholder="Country" style="flex:1;">
+        </div>
+        <div id="loc-status" style="font-size:.7rem;opacity:.5;margin:-6px 0 10px 2px;min-height:1em;"></div>
 
         <button onclick="getInsights()">SEEK COSMIC CREAMINESS</button>
     </div>
@@ -391,6 +395,62 @@
         return 1;
     }
 
+    // Fallback coordinates used only if the geocoding API is unreachable.
+    const FALLBACK_COORDS = {
+        'london':[51.51,-0.13],'new york':[40.71,-74.01],'paris':[48.85,2.35],
+        'tokyo':[35.68,139.69],'mumbai':[19.08,72.88],'sydney':[-33.87,151.21],
+        'moscow':[55.76,37.62],'berlin':[52.52,13.40],'los angeles':[34.05,-118.24],
+        'chicago':[41.88,-87.63],'toronto':[43.65,-79.38],'dubai':[25.20,55.27],
+        'singapore':[1.35,103.82],'taipei':[25.05,121.53],'delhi':[28.61,77.21],
+        'beijing':[39.91,116.39],'shanghai':[31.23,121.47],'seoul':[37.57,126.98],
+        'bangkok':[13.75,100.52],'cairo':[30.05,31.25],'lagos':[6.45,3.40],
+        'sao paulo':[-23.55,-46.63],'mexico city':[19.43,-99.13],'buenos aires':[-34.61,-58.38]
+    };
+
+    // Resolves a city (optionally + country) to real coordinates, so that
+    // ambiguous names like "Odessa" (Ukraine vs. Texas vs. others) land on
+    // the correct one instead of silently defaulting to London.
+    async function geocodeLocation(cityStr, countryStr) {
+        const city = (cityStr||'').trim();
+        const country = (countryStr||'').trim().toLowerCase();
+        if (!city) return { lat:51.5, lon:-0.1, resolvedLabel:null };
+
+        try {
+            const url = 'https://geocoding-api.open-meteo.com/v1/search?name='
+                + encodeURIComponent(city) + '&count=10&language=en&format=json';
+            const res = await fetch(url);
+            const data = await res.json();
+            const results = (data && data.results) || [];
+
+            if (results.length) {
+                let pick = null;
+                if (country) {
+                    pick = results.find(r =>
+                        (r.country && r.country.toLowerCase().includes(country)) ||
+                        (r.country_code && r.country_code.toLowerCase() === country)
+                    );
+                }
+                if (!pick) pick = results[0];
+
+                const parts = [pick.name, pick.admin1, pick.country].filter(Boolean);
+                const label = parts.join(', ') + (results.length > 1 && !country
+                    ? ' (multiple matches found — add a Country to be sure)' : '');
+                return { lat: pick.latitude, lon: pick.longitude, resolvedLabel: label };
+            }
+        } catch (e) {
+            // network hiccup — fall through to offline fallback below
+        }
+
+        // Offline fallback: rough match against a small hardcoded list.
+        const key = city.toLowerCase();
+        for (const [c, coords] of Object.entries(FALLBACK_COORDS)) {
+            if (key.includes(c) || c.includes(key)) {
+                return { lat: coords[0], lon: coords[1], resolvedLabel: c + ' (offline estimate, could not verify)' };
+            }
+        }
+        return { lat:51.5, lon:-0.1, resolvedLabel: 'could not locate "' + city + '" — using London as placeholder' };
+    }
+
     async function getInsights() {
         const access = await checkAccess();
         if (access.status === 'limit') {
@@ -419,22 +479,14 @@
         const tobHour=parseInt(document.getElementById('hr').value)||12;
         const tobMin=parseInt(document.getElementById('mn').value)||0;
         const locStr=document.getElementById('loc').value||'London';
+        const countryStr=document.getElementById('loc-country').value||'';
 
-        const cityCoords = {
-            'london':[51.51,-0.13],'new york':[40.71,-74.01],'paris':[48.85,2.35],
-            'tokyo':[35.68,139.69],'mumbai':[19.08,72.88],'sydney':[-33.87,151.21],
-            'moscow':[55.76,37.62],'berlin':[52.52,13.40],'los angeles':[34.05,-118.24],
-            'chicago':[41.88,-87.63],'toronto':[43.65,-79.38],'dubai':[25.20,55.27],
-            'singapore':[1.35,103.82],'taipei':[25.05,121.53],'delhi':[28.61,77.21],
-            'beijing':[39.91,116.39],'shanghai':[31.23,121.47],'seoul':[37.57,126.98],
-            'bangkok':[13.75,100.52],'cairo':[30.05,31.25],'lagos':[6.45,3.40],
-            'sao paulo':[-23.55,-46.63],'mexico city':[19.43,-99.13],'buenos aires':[-34.61,-58.38]
-        };
-        let lat=51.5, lon=-0.1;
-        const key=locStr.toLowerCase().trim();
-        for (const [city,coords] of Object.entries(cityCoords)) {
-            if(key.includes(city)||city.includes(key)){[lat,lon]=coords;break;}
-        }
+        out.innerText = 'Locating your birthplace among the ley lines…';
+        const geo = await geocodeLocation(locStr, countryStr);
+        const lat = geo.lat, lon = geo.lon;
+        const locStatus = document.getElementById('loc-status');
+        locStatus.textContent = geo.resolvedLabel ? ('Using: ' + geo.resolvedLabel) : '';
+        out.innerText = 'Dredging the silt…';
 
         const jd=julianDay(dobYear,dobMonth,dobDay,tobHour+tobMin/60-lon/15);
         const eps=obliquity(jd);
