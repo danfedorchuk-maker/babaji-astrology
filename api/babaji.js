@@ -73,7 +73,8 @@ module.exports = async function handler(req, res) {
             })
         });
         const aiData = await groqRes.json();
-        const reading = aiData.choices[0].message.content;
+        const rawReading = aiData.choices[0].message.content;
+        const reading = cleanMarkdown(rawReading);
 
         const voices = {
             'en-western': ['en-GB', 'en-GB-Wavenet-B',   'MALE'],
@@ -172,6 +173,18 @@ async function synthesizeChunked(text, voice, apiKey) {
     if (!buffers.length) return null;
     if (buffers.length === 1) return buffers[0];
     return Buffer.concat(buffers.map(b => Buffer.from(b, 'base64'))).toString('base64');
+}
+
+function cleanMarkdown(text) {
+    return (text || '')
+        .replace(/\*\*(.*?)\*\*/g, '$1')   // **bold**
+        .replace(/\*(.*?)\*/g, '$1')       // *italic*
+        .replace(/__(.*?)__/g, '$1')       // __bold__
+        .replace(/_(.*?)_/g, '$1')         // _italic_
+        .replace(/^#{1,6}\s+/gm, '')       // # headers
+        .replace(/^[-*+]\s+/gm, '')        // - bullet points
+        .replace(/`([^`]+)`/g, '$1')       // `inline code`
+        .trim();
 }
 
 function splitText(text, max) {
