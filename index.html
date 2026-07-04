@@ -30,6 +30,13 @@
         .pane{display:none;text-align:left;animation:fadeIn 1s;}
         .pane.active{display:block;}
         #babaji-text{font-family:'Playfair Display',serif;font-style:italic;font-size:1.1rem;line-height:1.9;color:#eee;padding:10px;}
+        .glossary-term{border-bottom:1px dotted var(--gold,#d4af37);cursor:pointer;font-style:normal;transition:background .2s;}
+        .glossary-term:hover,.glossary-term:active{background:rgba(212,175,55,.15);}
+        #glossary-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9999;align-items:center;justify-content:center;padding:20px;}
+        #glossary-modal{background:#12121e;border:1px solid rgba(212,175,55,.4);padding:24px;max-width:360px;width:100%;border-radius:2px;text-align:left;}
+        #glossary-title{font-family:'Cinzel Decorative',serif;color:var(--gold,#d4af37);font-size:1.1rem;margin-bottom:12px;text-transform:uppercase;letter-spacing:1px;}
+        #glossary-def{font-family:'Inter',sans-serif;font-size:.9rem;line-height:1.7;color:#ddd;margin:0 0 18px 0;}
+        #glossary-modal button{width:auto;padding:10px 20px;border:1px solid rgba(212,175,55,.4);background:transparent;color:var(--gold,#d4af37);font-family:'Inter',sans-serif;font-size:.75rem;letter-spacing:1px;cursor:pointer;margin-bottom:0;}
         table{width:100%;border-collapse:collapse;margin-top:10px;}
         th{font-family:'Playfair Display',serif;font-style:italic;font-size:.85rem;color:var(--gold);text-align:left;padding:10px 5px;border-bottom:1px solid rgba(212,175,55,.2);}
         td{padding:12px 5px;border-bottom:1px solid rgba(255,255,255,.05);color:#ddd;font-size:.9rem;}
@@ -174,10 +181,94 @@
     </div>
 </div>
 
+<div id="glossary-backdrop" onclick="if(event.target===this) closeGlossary()">
+    <div id="glossary-modal">
+        <div id="glossary-title"></div>
+        <p id="glossary-def"></p>
+        <button onclick="closeGlossary()">CLOSE</button>
+    </div>
+</div>
+
 <script>
     const state = { trad: 'western', lang: null, house: 'placidus' };
     const browserLang = navigator.language || 'en';
     let blobUrl = null;
+
+    const GLOSSARY = {
+        'ascendant': 'The zodiac sign rising on the eastern horizon at the exact moment of birth. It shapes first impressions and outward manner — often called the "rising sign."',
+        'midheaven': 'The highest point of the chart, tied to career, public reputation, and life direction. Also called the MC.',
+        'descendant': 'The point directly opposite the Ascendant, associated with partnerships and how one relates to others.',
+        'imum coeli': 'The lowest point of the chart, linked to home, family roots, and private life. Also called the IC.',
+        'retrograde': 'When a planet appears to move backward through the sky from Earth\'s point of view. In astrology it\'s often read as a time to revisit, review, or slow down matters ruled by that planet.',
+        'conjunction': 'An aspect where two planets sit close together in the same degree of the zodiac, blending their energies into one combined force.',
+        'opposition': 'An aspect where two planets sit roughly 180 degrees apart, creating tension or a need for balance between them.',
+        'trine': 'An aspect where two planets sit roughly 120 degrees apart, generally considered easy and flowing.',
+        'square': 'An aspect where two planets sit roughly 90 degrees apart, often read as friction or a challenge that pushes growth.',
+        'sextile': 'An aspect where two planets sit roughly 60 degrees apart, generally considered a mild, supportive connection.',
+        'cusp': 'The exact dividing line where one house or sign ends and the next begins.',
+        'house': 'One of twelve divisions of the sky at the moment of birth, each governing a different area of life such as money, relationships, or career.',
+        'cardinal': 'One of three modalities in astrology, describing signs (Aries, Cancer, Libra, Capricorn) associated with initiating action and starting new things.',
+        'fixed': 'One of three modalities in astrology, describing signs (Taurus, Leo, Scorpio, Aquarius) associated with stability, persistence, and resistance to change.',
+        'mutable': 'One of three modalities in astrology, describing signs (Gemini, Virgo, Sagittarius, Pisces) associated with adaptability and change.',
+        'north node': 'A point representing growth, purpose, and the direction a person is meant to develop toward in this lifetime.',
+        'south node': 'A point representing inherited habits, past patterns, and comfort zones a person is meant to move beyond.',
+        'natal chart': 'A map of where all the planets and points sat in the sky at the exact time and place of a person\'s birth.',
+        'orb': 'The margin of allowed distance from an exact aspect degree; a smaller orb means a stronger, more precise connection.',
+        'sidereal': 'A zodiac system based on the actual current position of constellations in the sky, commonly used in Vedic astrology.',
+        'tropical': 'A zodiac system based on the seasons and the Sun\'s relationship to the Earth, commonly used in Western astrology.',
+        'nakshatra': 'One of 27 lunar mansions used in Vedic astrology to give finer detail to the Moon\'s placement than the zodiac sign alone.',
+        'dasha': 'A Vedic astrology system of planetary time periods used to predict when certain life themes will be most active.',
+        'rahu': 'The North Node of the Moon in Vedic astrology, associated with worldly desire, ambition, and karmic growth.',
+        'ketu': 'The South Node of the Moon in Vedic astrology, associated with detachment, past-life karma, and spiritual release.',
+        'lagna': 'The Vedic astrology term for the Ascendant, or rising sign.',
+        'yin': 'In Chinese cosmology, the receptive, feminine, dark, and inward principle that pairs with yang.',
+        'yang': 'In Chinese cosmology, the active, masculine, bright, and outward principle that pairs with yin.',
+        'wu xing': 'The Chinese five-element system (Wood, Fire, Earth, Metal, Water) describing how energy cycles and interacts.',
+        'aries': 'A cardinal fire sign known for boldness, initiative, and impulsiveness.',
+        'taurus': 'A fixed earth sign known for steadiness, patience, and a love of comfort.',
+        'gemini': 'A mutable air sign known for curiosity, communication, and adaptability.',
+        'cancer': 'A cardinal water sign known for nurturing instincts, emotional depth, and attachment to home.',
+        'leo': 'A fixed fire sign known for confidence, warmth, and a need for recognition.',
+        'virgo': 'A mutable earth sign known for precision, practicality, and a drive to improve things.',
+        'libra': 'A cardinal air sign known for balance, diplomacy, and a focus on relationships.',
+        'scorpio': 'A fixed water sign known for intensity, depth, and transformation.',
+        'sagittarius': 'A mutable fire sign known for optimism, adventure, and a love of philosophy or travel.',
+        'capricorn': 'A cardinal earth sign known for discipline, ambition, and long-term thinking.',
+        'aquarius': 'A fixed air sign known for independence, originality, and humanitarian ideals.',
+        'pisces': 'A mutable water sign known for empathy, imagination, and a dreamy, intuitive nature.'
+    };
+
+    function escapeHtml(s) {
+        return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+    function escapeAttr(s) {
+        return escapeHtml(s).replace(/"/g,'&quot;');
+    }
+
+    function annotateGlossary(text) {
+        const escaped = escapeHtml(text || '');
+        const terms = Object.keys(GLOSSARY).sort((a,b) => b.length - a.length);
+        const pattern = new RegExp('\\b(' + terms.map(t => t.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).join('|') + ')\\b', 'gi');
+        return escaped.replace(pattern, (match) => {
+            const def = GLOSSARY[match.toLowerCase()];
+            if (!def) return match;
+            return `<span class="glossary-term" data-term="${escapeAttr(match)}" data-def="${escapeAttr(def)}">${match}</span>`;
+        });
+    }
+
+    function showGlossary(term, def) {
+        document.getElementById('glossary-title').textContent = term;
+        document.getElementById('glossary-def').textContent = def;
+        document.getElementById('glossary-backdrop').style.display = 'flex';
+    }
+    function closeGlossary() {
+        document.getElementById('glossary-backdrop').style.display = 'none';
+    }
+    document.getElementById('babaji-text').addEventListener('click', function(e) {
+        const t = e.target.closest('.glossary-term');
+        if (!t) return;
+        showGlossary(t.dataset.term, t.dataset.def);
+    });
 
     function getVisitorId() {
         let vid = localStorage.getItem('babaji_vid');
@@ -516,7 +607,7 @@
                 })
             });
             const data = await res.json();
-            out.innerText = data.reading;
+            out.innerHTML = annotateGlossary(data.reading);
 
             if (data.audio) {
                 const bytes=atob(data.audio);
