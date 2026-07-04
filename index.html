@@ -67,6 +67,12 @@
     <h1>ASK BABAJI</h1>
     <span class="tag">VINTAGE COSMOLOGY • GROUNDED INSIGHT</span>
 
+    <span class="lbl">READING TYPE</span>
+    <div class="seg" id="mode-seg">
+        <button class="active" onclick="pick(this,'mode','natal')">NATAL READING</button>
+        <button onclick="pick(this,'mode','marriage')">MARRIAGE TIMING</button>
+    </div>
+
     <div id="main-form">
         <span class="lbl">CHOOSE YOUR TRADITION</span>
         <div class="seg" id="trad-seg">
@@ -115,6 +121,38 @@
         <div id="loc-status" style="font-size:.7rem;opacity:.5;margin:-6px 0 10px 2px;min-height:1em;"></div>
 
         <button onclick="getInsights()">SEEK COSMIC CREAMINESS</button>
+    </div>
+
+    <div id="marriage-form" style="display:none;">
+        <span class="lbl">SEARCH WINDOW</span>
+        <div class="row">
+            <input type="date" id="mt-start" style="flex:1;">
+            <input type="date" id="mt-end" style="flex:1;">
+        </div>
+
+        <span class="lbl">PARTNER A (optional, sharpens the reading)</span>
+        <input type="text" id="mtA-name" placeholder="Partner A's Name">
+        <div class="row">
+            <input type="date" id="mtA-dob" style="flex:1;">
+            <input type="time" id="mtA-tob" style="flex:1;">
+        </div>
+        <div class="row">
+            <input type="text" id="mtA-loc" placeholder="City of Birth" style="flex:1.4;">
+            <input type="text" id="mtA-country" placeholder="Country" style="flex:1;">
+        </div>
+
+        <span class="lbl">PARTNER B (optional, sharpens the reading)</span>
+        <input type="text" id="mtB-name" placeholder="Partner B's Name">
+        <div class="row">
+            <input type="date" id="mtB-dob" style="flex:1;">
+            <input type="time" id="mtB-tob" style="flex:1;">
+        </div>
+        <div class="row">
+            <input type="text" id="mtB-loc" placeholder="City of Birth" style="flex:1.4;">
+            <input type="text" id="mtB-country" placeholder="Country" style="flex:1;">
+        </div>
+
+        <button onclick="getMarriageTiming()">FIND AUSPICIOUS DATES</button>
     </div>
 
     <!-- PAYWALL -->
@@ -179,6 +217,27 @@
         </div>
         <div id="asp" class="pane"><div id="aspect-list"></div></div>
     </div>
+
+    <div id="marriage-results" style="display:none">
+        <div class="audio-box">
+            <span class="lbl">BABAJI SPEAKS</span>
+            <audio id="mt-audio-player" controls></audio>
+        </div>
+        <span class="lbl" style="display:block;margin-top:24px;">RANKED DATES</span>
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Moon Sign</th>
+                    <th>Mercury</th>
+                    <th>Venus</th>
+                    <th>Score</th>
+                </tr>
+            </thead>
+            <tbody id="mt-date-body"></tbody>
+        </table>
+        <div id="mt-text" style="font-family:'Playfair Display',serif;font-style:italic;font-size:1.1rem;line-height:1.9;color:#eee;padding:10px;margin-top:20px;"></div>
+    </div>
 </div>
 
 <div id="glossary-backdrop" onclick="if(event.target===this) closeGlossary()">
@@ -190,7 +249,7 @@
 </div>
 
 <script>
-    const state = { trad: 'western', lang: null, house: 'placidus' };
+    const state = { trad: 'western', lang: null, house: 'placidus', mode: 'natal' };
     const browserLang = navigator.language || 'en';
     let blobUrl = null;
 
@@ -264,7 +323,7 @@
     function closeGlossary() {
         document.getElementById('glossary-backdrop').style.display = 'none';
     }
-    document.getElementById('babaji-text').addEventListener('click', function(e) {
+    document.addEventListener('click', function(e) {
         const t = e.target.closest('.glossary-term');
         if (!t) return;
         showGlossary(t.dataset.term, t.dataset.def);
@@ -338,18 +397,26 @@
     }
 
     function showPaywall() {
-        document.getElementById('main-form').style.display = 'none';
+        document.getElementById(state.mode === 'marriage' ? 'marriage-form' : 'main-form').style.display = 'none';
         document.getElementById('paywall').style.display = 'block';
     }
 
     function pick(el, key, val) {
-        const segId = key === 'trad' ? 'trad-seg' : key === 'house' ? 'house-seg' : 'lang-seg';
+        const segMap = { trad: 'trad-seg', house: 'house-seg', mode: 'mode-seg', lang: 'lang-seg' };
+        const segId = segMap[key] || 'lang-seg';
         document.querySelectorAll(`#${segId} button`).forEach(b => b.classList.remove('active'));
         state[key] = val;
         if (val !== null) el.classList.add('active');
         updatePill();
         if (key === 'trad') {
             document.getElementById('house-sys-wrap').style.display = val === 'western' ? 'block' : 'none';
+        }
+        if (key === 'mode') {
+            document.getElementById('main-form').style.display = val === 'marriage' ? 'none' : 'block';
+            document.getElementById('marriage-form').style.display = val === 'marriage' ? 'block' : 'none';
+            document.getElementById('results').style.display = 'none';
+            document.getElementById('marriage-results').style.display = 'none';
+            document.getElementById('paywall').style.display = 'none';
         }
     }
 
@@ -599,6 +666,7 @@
                     dob: `${document.getElementById('yr').value}-${document.getElementById('mon').value}-${document.getElementById('day').value}`,
                     tob: `${document.getElementById('hr').value}:${document.getElementById('mn').value}`,
                     loc: locStr,
+                    country: countryStr,
                     tradition: state.trad,
                     lang: state.lang||browserLang,
                     houseSystem: state.house,
@@ -647,6 +715,90 @@
 
         } catch(e) {
             out.innerText='The stars are obscured. ('+e.message+')';
+        }
+    }
+
+    let mtBlobUrl = null;
+    async function getMarriageTiming() {
+        const access = await checkAccess();
+        if (access.status === 'limit') {
+            showPaywall();
+            return;
+        }
+        if (access.status === 'credits') {
+            await fetch('/api/use-credit', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ visitorId })
+            });
+        }
+
+        const start = document.getElementById('mt-start').value;
+        const end = document.getElementById('mt-end').value;
+        if (!start || !end) { alert('Please choose both a start and end date for the search window.'); return; }
+
+        const partnerA = {
+            name: document.getElementById('mtA-name').value || null,
+            dob: document.getElementById('mtA-dob').value || null,
+            tob: document.getElementById('mtA-tob').value || null,
+            loc: document.getElementById('mtA-loc').value || null,
+            country: document.getElementById('mtA-country').value || null
+        };
+        const partnerB = {
+            name: document.getElementById('mtB-name').value || null,
+            dob: document.getElementById('mtB-dob').value || null,
+            tob: document.getElementById('mtB-tob').value || null,
+            loc: document.getElementById('mtB-loc').value || null,
+            country: document.getElementById('mtB-country').value || null
+        };
+
+        const mtText = document.getElementById('mt-text');
+        const mtPlayer = document.getElementById('mt-audio-player');
+        document.getElementById('marriage-results').style.display = 'block';
+        document.getElementById('mt-date-body').innerHTML = '';
+        mtText.innerText = 'Consulting the ledger for favorable days…';
+        if (mtBlobUrl) { URL.revokeObjectURL(mtBlobUrl); mtBlobUrl = null; mtPlayer.src = ''; }
+
+        try {
+            const res = await fetch('/api/marriage-timing', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    startDate: start,
+                    endDate: end,
+                    partnerA, partnerB,
+                    lang: state.lang || browserLang,
+                    visitorId
+                })
+            });
+            const data = await res.json();
+
+            if (data.error) {
+                mtText.innerText = 'The stars are obscured. (' + data.error + ')';
+                return;
+            }
+
+            const rows = (data.dates || []).map(d => `
+                <tr>
+                    <td>${d.date}</td>
+                    <td>${d.moonSign}${d.waxing ? ' ↑' : ' ↓'}</td>
+                    <td>${d.mercuryRetro ? 'Retrograde' : 'Direct'}</td>
+                    <td>${d.venusRetro ? 'Retrograde' : 'Direct'}</td>
+                    <td>${d.score}</td>
+                </tr>`).join('');
+            document.getElementById('mt-date-body').innerHTML = rows || '<tr><td colspan="5">No dates found in that window.</td></tr>';
+
+            mtText.innerHTML = annotateGlossary(data.reading || '');
+
+            if (data.audio) {
+                const bytes = atob(data.audio);
+                const buf = new Uint8Array(bytes.length);
+                for (let i = 0; i < bytes.length; i++) buf[i] = bytes.charCodeAt(i);
+                mtBlobUrl = URL.createObjectURL(new Blob([buf], {type: 'audio/mpeg'}));
+                mtPlayer.src = mtBlobUrl; mtPlayer.load(); mtPlayer.play().catch(()=>{});
+            }
+        } catch (e) {
+            mtText.innerText = 'The stars are obscured. (' + e.message + ')';
         }
     }
 </script>
